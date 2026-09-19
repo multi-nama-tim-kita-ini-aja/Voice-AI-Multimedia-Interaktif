@@ -11,7 +11,7 @@ interface MenuItem {
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { id: "about", title: "About", icon: "/notes.png", targetId: "about" },
+  { id: "categories", title: "Categories", icon: "/notes.png", targetId: "categories" },
   { id: "projects", title: "Projects", icon: "/picture.png", targetId: "projects" },
   { id: "services", title: "Services", icon: "/face.png", targetId: "services" },
   { id: "contact", title: "Contact", icon: "/contact.png", targetId: "footer" },
