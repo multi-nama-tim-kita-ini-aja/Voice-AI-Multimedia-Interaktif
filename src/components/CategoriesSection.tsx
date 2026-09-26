@@ -26,7 +26,8 @@ interface CategoryItem {
   badgeText: string;
   badgeBg: string;
   badgeColor: string;
-  imageSrc: string;
+  bgImage: string;
+  photo: string;
   accentBorder: string;
   // Posisi fan-out di desktop
   desktopPos: { x: number; y: number; rotate: number };
@@ -37,14 +38,15 @@ interface CategoryItem {
 const CATEGORIES: CategoryItem[] = [
   {
     id: "english",
-    label: "English",
+    label: "ENGLISH",
     badgeText: "Language",
     badgeBg: "bg-[#F4EAF5]",
     badgeColor: "text-[#EC68FD]",
-    imageSrc: "/cardenglish.png",
+    bgImage: "/cardenglish.png",
+    photo: "/photo-english.png",
     accentBorder: "border-[#EC68FD]",
-    desktopPos: { x: 0, y: -140, rotate: 3 },
-    mobilePos: { x: 0, y: -130, rotate: 4 },
+    desktopPos: { x: 0, y: -120, rotate: 3 },
+    mobilePos: { x: 0, y: -110, rotate: 4 },
   },
   {
     id: "ips",
@@ -52,21 +54,23 @@ const CATEGORIES: CategoryItem[] = [
     badgeText: "Social",
     badgeBg: "bg-[#F4F8E8]",
     badgeColor: "text-[#93BA06]",
-    imageSrc: "/cardips.png",
+    bgImage: "/cardips.png",
+    photo: "/photo-ips.png",
     accentBorder: "border-[#93BA06]",
-    desktopPos: { x: -240, y: 50, rotate: -8 },
-    mobilePos: { x: -80, y: 40, rotate: -9 },
+    desktopPos: { x: -260, y: 35, rotate: -8 },
+    mobilePos: { x: -70, y: 30, rotate: -9 },
   },
   {
     id: "matematika",
-    label: "Matematika",
+    label: "MATEMATIKA",
     badgeText: "Science",
     badgeBg: "bg-[#E5F2FA]",
     badgeColor: "text-[#039CFB]",
-    imageSrc: "/cardmatematika.png",
+    bgImage: "/cardmatematika.png",
+    photo: "/photo-matematika.png",
     accentBorder: "border-[#039CFB]",
-    desktopPos: { x: 240, y: 70, rotate: 9 },
-    mobilePos: { x: 80, y: 80, rotate: 9 },
+    desktopPos: { x: 260, y: 55, rotate: 9 },
+    mobilePos: { x: 70, y: 65, rotate: 9 },
   },
 ];
 
@@ -139,7 +143,7 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
 
       {/* Interactive Window Picker Area */}
       <div
-        className="relative w-full max-w-[900px] h-[400px] md:h-[480px] flex items-center justify-center z-20"
+        className="relative w-full max-w-[1000px] h-[420px] md:h-[480px] flex items-center justify-center z-20"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -155,7 +159,7 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
               exit={{ scale: 0.85, opacity: 0, rotate: -12 }}
               whileHover={{ scale: 1.04, rotate: -4 }}
               transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="absolute w-[260px] sm:w-[300px] md:w-[340px] h-[260px] sm:h-[290px] md:h-[320px] rounded-2xl bg-white shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 flex flex-col overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-30"
+              className="absolute w-[240px] sm:w-[270px] md:w-[300px] h-[200px] sm:h-[220px] md:h-[240px] rounded-2xl bg-white shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 flex flex-col overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-30"
             >
               {/* macOS Titlebar Header */}
               <div className="w-full h-8 sm:h-9 md:h-10 bg-neutral-100/90 border-b border-black/5 flex items-center px-3.5 gap-2 shrink-0">
@@ -190,7 +194,7 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="hidden md:flex absolute top-[60%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
+                className="hidden md:flex absolute top-[70%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
               >
                 <InteractiveCrossedEyes size={48} />
               </motion.div>
@@ -223,48 +227,61 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
                     exit={{ scale: 0.5, opacity: 0, x: 0, y: 0, rotate: 0 }}
                     whileHover={{ scale: isSelected ? 1.12 : 1.06, zIndex: 40 }}
                     transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                    className={`absolute w-[220px] sm:w-[260px] md:w-[290px] h-[210px] sm:h-[240px] md:h-[260px] rounded-2xl bg-white flex flex-col overflow-hidden cursor-pointer text-left transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-20 ${
-                      isSelected
-                        ? `ring-4 ring-offset-2 ${category.accentBorder} shadow-[10px_10px_0_0_rgba(0,0,0,0.2)] border-2`
-                        : "shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 hover:shadow-[10px_10px_0_0_rgba(0,0,0,0.18)]"
-                    }`}
+                    className={`absolute w-[260px] sm:w-[280px] md:w-[300px] h-[300px] sm:h-[320px] md:h-[340px] rounded-2xl bg-white flex flex-col overflow-hidden cursor-pointer text-left transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-20 ${isSelected
+                      ? `ring-4 ring-offset-2 ${category.accentBorder} shadow-[10px_10px_0_0_rgba(0,0,0,0.2)] border-2`
+                      : "shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 hover:shadow-[10px_10px_0_0_rgba(0,0,0,0.18)]"
+                      }`}
                   >
-                    {/* macOS Titlebar Header */}
-                    <div className="w-full h-7 sm:h-8 md:h-9 bg-white/90 border-b border-black/5 flex items-center px-3.5 gap-1.5 shrink-0 justify-between z-10">
+                    {/* LAYER -10: Background Skin (cardenglish.png / cardips.png / cardmatematika.png) */}
+                    <Image
+                      src={category.bgImage}
+                      alt={`${category.label} skin`}
+                      fill
+                      priority
+                      className="object-cover -z-10 rounded-2xl"
+                      sizes="(max-width: 768px) 100vw, 300px"
+                    />
+
+                    {/* LAYER z-20: macOS Titlebar Header */}
+                    <div className="w-full h-7 sm:h-8 bg-white/80 backdrop-blur-sm border-b border-black/5 flex items-center px-3.5 gap-1.5 shrink-0 justify-between z-20">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
                         <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
                         <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
                       </div>
                       {isSelected && (
-                        <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={13} />
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={12} />
                           <span>SELECTED</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Window Content Body with Card Image as Background */}
-                    <div className="relative flex-1 flex flex-col items-center justify-center p-5 text-center overflow-hidden">
-                      <Image
-                        src={category.imageSrc}
-                        alt={category.label}
-                        fill
-                        priority
-                        className="object-cover -z-10"
-                      />
-
-                      {/* Badge Tag */}
-                      <span className={`px-3 py-0.5 rounded-full text-xs font-semibold font-plusJakartaSans mb-2 ${category.badgeBg} ${category.badgeColor}`}>
+                    {/* LAYER z-20: Card Body Content */}
+                    <div className="relative flex-1 flex flex-col items-center justify-between p-2.5 sm:p-3 text-center overflow-hidden z-20">
+                      {/* Badge Tag Kategori */}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-plusJakartaSans ${category.badgeBg} ${category.badgeColor}`}>
                         {category.badgeText}
                       </span>
 
-                      {/* Category Label */}
-                      <p className="text-[#212121] font-monaSans text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-[-0.03em] uppercase">
+                      {/* Slot Foto Tematik */}
+                      <div className="relative w-full max-w-[250px] h-[135px] sm:h-[150px] md:h-[160px] rounded-xl overflow-hidden border border-black/10 shadow-sm bg-neutral-100/80 z-20 shrink-0 my-1">
+                        <Image
+                          src={category.photo}
+                          alt={`${category.label} photo`}
+                          fill
+                          sizes="250px"
+                          className="object-cover"
+                        />
+                      </div>
+
+                      {/* Label Kategori */}
+                      <p className="text-[#212121] font-monaSans text-lg sm:text-xl md:text-2xl font-extrabold tracking-[-0.03em] uppercase">
                         {category.label}
                       </p>
 
-                      <p className="mt-2 text-[11px] md:text-xs text-neutral-400 font-inter">
+                      {/* Teks Instruksi */}
+                      <p className="text-[10px] sm:text-[11px] text-neutral-500 font-inter">
                         {isSelected ? "Tap again to confirm" : "Click to select"}
                       </p>
                     </div>
