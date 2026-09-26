@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Book02Icon } from "@hugeicons/core-free-icons";
 
 import BowTieDoodle from "@/components/svg/BowTieDoodle";
 import DoubleCloudDoodle from "@/components/svg/DoubleCloudDoodle";
@@ -17,6 +19,7 @@ import VolumeHighIcon from "@/components/svg/VolumeHighIcon";
 import Mic01Icon from "@/components/svg/Mic01Icon";
 import CpuIcon from "@/components/svg/CpuIcon";
 import Trophy01Icon from "@/components/svg/Trophy01Icon";
+import { CustomWaveButton } from "@/components/ui/wave-button";
 
 interface StepItem {
   id: string;
@@ -24,6 +27,7 @@ interface StepItem {
   title: string;
   description: string;
   icon: React.ElementType;
+  desktopMt: string;
 }
 
 const STEPS: StepItem[] = [
@@ -34,6 +38,7 @@ const STEPS: StepItem[] = [
     description:
       "Choose your favorite quiz topic on the homepage to start an exciting challenge.",
     icon: GridIcon,
+    desktopMt: "md:mt-0",
   },
   {
     id: "step-2",
@@ -42,6 +47,7 @@ const STEPS: StepItem[] = [
     description:
       "The AI system will read out the quiz questions clearly via audio.",
     icon: VolumeHighIcon,
+    desktopMt: "md:mt-9",
   },
   {
     id: "step-3",
@@ -50,6 +56,7 @@ const STEPS: StepItem[] = [
     description:
       "Simply speak your answer directly into the microphone without typing.",
     icon: Mic01Icon,
+    desktopMt: "md:mt-[72px]",
   },
   {
     id: "step-4",
@@ -58,6 +65,7 @@ const STEPS: StepItem[] = [
     description:
       "AI instantly and automatically matches the meaning of your answer.",
     icon: CpuIcon,
+    desktopMt: "md:mt-[108px]",
   },
   {
     id: "step-5",
@@ -66,19 +74,20 @@ const STEPS: StepItem[] = [
     description:
       "Achieve high scores, build your combo streak, and dominate the leaderboard!",
     icon: Trophy01Icon,
+    desktopMt: "md:mt-[144px]",
   },
 ];
 
 export default function HowToPlay() {
   const [activeStep, setActiveStep] = useState<string | null>(null);
 
-  // Rotation angles for layout variation
+  // Derajat kemiringan rotasi kartu (tetap aktif di mobile & desktop)
   const cardRotations = [-5, 3.5, -4, 4.5, -2.5];
 
   return (
     <section
       id="how-to-play"
-      className="relative w-full pt-20 pb-32 md:pt-28 md:pb-40 px-4 overflow-hidden flex flex-col justify-center items-center"
+      className="relative w-full pt-20 pb-32 md:pt-28 md:pb-48 px-4 overflow-hidden flex flex-col justify-center items-center"
       onClick={() => setActiveStep(null)}
     >
       <div className="absolute inset-0 bg-[url('/garis-kotak.png')] bg-repeat bg-top pointer-events-none -z-10 opacity-70" />
@@ -109,40 +118,46 @@ export default function HowToPlay() {
         className="absolute bottom-8 right-4 md:bottom-16 md:right-16 rotate-6 pointer-events-none select-none z-10 mix-blend-multiply"
       />
 
-      <div className="relative w-full max-w-[1280px] flex flex-col items-center z-20">
+      <div className="relative w-full max-w-[1360px] flex flex-col items-center z-20">
         {/* Section Header */}
-        <div className="flex flex-col items-center mb-6 md:mb-8 relative select-none pt-4">
+        <div className="flex flex-col items-center mb-10 md:mb-14 relative select-none pt-4">
           <div className="relative inline-block">
-            {/* Tag Rules: Dibuat persis dengan style Tag FAQs */}
-            <div className="absolute -top-3 -left-5 md:-top-4 md:-left-9 z-30 flex items-center gap-2 pl-1 pr-3.5 py-1 bg-[#E8F5E9] border border-white/80 shadow-md rounded-2xl -rotate-[16deg] origin-bottom-left pointer-events-none">
-              {/* Pin Hiasan */}
-              <Image
-                src="/pin.png"
-                alt="Pin"
-                width={16}
-                height={16}
-                className="absolute -top-2 right-1 mix-blend-multiply z-40"
-              />
-              {/* Icon Circle */}
-              <div className="w-6 h-6 rounded-full bg-[#0088FF] flex items-center justify-center text-white shadow-sm shrink-0">
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
+            {/* Tag Rules: Skala pas di mobile, tidak menutupi huruf "HOW" */}
+            <div className="w-[88px] sm:w-[96px] md:w-[113px] h-[42px] sm:h-[46px] md:h-[54px] absolute -top-9 -left-2 sm:-top-9 sm:-left-4 md:-top-11 md:-left-12 -rotate-[10deg] md:-rotate-[12deg] z-30 pointer-events-none select-none scale-75 sm:scale-85 md:scale-100 origin-bottom-right">
+              {/* Box Tag */}
+              <div className="flex py-[2px] md:py-[3px] px-1.5 md:px-2 justify-center items-center gap-[3px] rounded-[5.2px] bg-[#E8F3FA] shadow-[0_0_7px_0_rgba(0,0,0,0.06)] w-full h-[26px] sm:h-[28px] md:h-[34px] absolute left-0 top-3.5 sm:top-4 md:top-5 overflow-hidden">
+                <div className="flex flex-col items-center shrink-0 w-[68px] sm:w-[76px] md:w-[98px]">
+                  <p className="text-[#212121] font-plusJakartaSans text-[10px] sm:text-[11px] md:text-[13px] font-semibold leading-tight w-fit">
+                    Rules
+                  </p>
+                </div>
+                <Image
+                  src="/paper-blue.png"
+                  alt="Clip"
+                  width={11}
+                  height={11}
+                  className="absolute -right-px -top-0.5"
+                />
               </div>
-              {/* Teks Tag */}
-              <span className="text-xs md:text-sm font-bold text-[#0D121C] tracking-tight">
-                Rules
-              </span>
+
+              {/* Circle Icon Badge */}
+              <div className="flex justify-center items-center rounded-full bg-[#0088FF] shadow-[-1.4px_2.1px_1.4px_0_rgba(0,0,0,0.24)] w-5 h-5 sm:w-6 sm:h-6 md:w-[29px] md:h-[29px] absolute left-1 top-px border-[0.93px] border-[#FFF]">
+                <HugeiconsIcon
+                  icon={Book02Icon}
+                  size={11}
+                  className="text-white shrink-0 sm:hidden"
+                />
+                <HugeiconsIcon
+                  icon={Book02Icon}
+                  size={13}
+                  className="text-white shrink-0 hidden sm:block md:hidden"
+                />
+                <HugeiconsIcon
+                  icon={Book02Icon}
+                  size={15}
+                  className="text-white shrink-0 hidden md:block"
+                />
+              </div>
             </div>
 
             <h2 className="text-[#0D121C] font-monaSans text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-center leading-tight">
@@ -154,25 +169,27 @@ export default function HowToPlay() {
             Follow these simple steps to get started with VOXIQ® and enjoy a seamless quiz experience.
           </p>
 
-          {/* Aksesoris Badge (Non-clickable) */}
-          <div className="mt-4 px-4 py-1.5 bg-white border border-gray-200 shadow-sm rounded-md rotate-[3deg] relative pointer-events-none">
+          {/* Aksesoris Badge Start Quiz */}
+          <div className="mt-4 px-4 py-1.5 rotate-[3deg] relative">
             <Image
               src="/pin.png"
               alt="Pin"
               width={16}
               height={16}
-              className="absolute -top-2 right-2 mix-blend-multiply"
+              className="absolute -top-0 right-2 mix-blend-multiply z-10"
             />
-            <span className="text-xs font-bold text-gray-700">Start Quiz</span>
+            <CustomWaveButton size="sm">
+              Start Quiz
+            </CustomWaveButton>
           </div>
         </div>
 
         {/* Step Cards Container */}
-        <div className="w-full overflow-x-auto md:overflow-visible pb-8 pt-2 px-2">
-          <div className="flex flex-col md:flex-row items-center md:items-start justify-center min-w-[920px] md:min-w-0">
+        {/* Step Cards Container: Muat Pas di Layar Desktop Tanpa Kepotong */}
+        <div className="w-full flex justify-center pb-16 pt-4 px-4 overflow-visible">
+          <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-9 md:gap-0 w-full max-w-[1180px]">
             {STEPS.map((step, idx) => {
               const rotate = cardRotations[idx % cardRotations.length];
-              const marginTopStep = idx * 32;
               const isActive = activeStep === step.id;
               const IconComponent = step.icon;
 
@@ -185,48 +202,58 @@ export default function HowToPlay() {
                   }}
                   style={{
                     transform: `rotate(${rotate}deg)`,
-                    marginTop: `${marginTopStep}px`,
                     zIndex: isActive ? 50 : idx + 1,
                   }}
-                  className={`group relative cursor-pointer rounded-[20px] bg-white p-4 lg:p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)] border border-gray-200/80 hover:!z-50 hover:scale-105 hover:rotate-0 hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 w-[220px] lg:w-[240px] h-[175px] lg:h-[185px] shrink-0 select-none flex flex-col ${
-                    idx > 0 ? "-ml-1 md:-ml-2" : ""
-                  } ${isActive ? "!z-50 scale-105 rotate-0 shadow-2xl -translate-y-3" : ""}`}
+                  className={`group relative cursor-pointer select-none transition-all duration-300 ${step.desktopMt} ${idx > 0 ? "md:-ml-14 lg:-ml-16" : ""
+                    } ${isActive
+                      ? "!z-50 scale-105 rotate-0 -translate-y-3"
+                      : "hover:!z-50 hover:scale-105 hover:rotate-0 hover:-translate-y-3"
+                    }`}
                 >
-                  <Image
-                    src="/pin.png"
-                    alt="Pin"
-                    width={18}
-                    height={18}
-                    className="absolute -top-2.5 left-3.5 select-none pointer-events-none mix-blend-multiply z-30 group-hover:scale-110 transition-transform"
-                  />
+                  {/* Shadow Layer Tebal di Bawah (Offset Kanan-Bawah Khas Kertas) */}
+                  <div className="absolute inset-0 bg-[#000000]/[0.08] rounded-[24px] md:rounded-[28px] translate-x-2.5 translate-y-2.5 pointer-events-none -z-10 transition-transform duration-300 group-hover:translate-x-3.5 group-hover:translate-y-3.5" />
 
-                  <div className="absolute top-0 right-0 w-9 h-9 pointer-events-none z-20 overflow-hidden rounded-tr-[20px]">
+                  {/* Card Utama: Proporsi Landscape Pas Layar */}
+                  <div className="relative rounded-[22px] md:rounded-[26px] bg-white p-5 md:p-5 lg:p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-gray-100/90 w-[290px] sm:w-[310px] md:w-[270px] lg:w-[290px] h-[175px] md:h-[180px] lg:h-[190px] flex flex-col justify-between ">
+                    {/* Pin Hiasan Kiri Atas */}
                     <Image
-                      src="/Container(4).png"
-                      alt="Corner Tape"
-                      width={36}
-                      height={36}
-                      className="w-full h-full object-cover select-none"
+                      src="/pin.png"
+                      alt="Pin"
+                      width={18}
+                      height={18}
+                      className="absolute -top-3 left-3 select-none pointer-events-none mix-blend-multiply z-30 group-hover:scale-110 transition-transform"
                     />
-                  </div>
 
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center gap-2 mb-2 pt-0.5">
-                      <div className="w-7 h-7 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-[#0D121C] group-hover:bg-[#0D121C] group-hover:text-white transition-colors duration-300 shrink-0">
-                        <IconComponent className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
-                        STEP {step.stepNum}
-                      </span>
+                    {/* Lipatan Sudut Kanan Atas (Tape) */}
+                    <div className="absolute -top-2 -right-2 w-14 h-14 md:w-16 md:h-16 pointer-events-none z-20 select-none">
+                      <Image
+                        src="/Container(4).png"
+                        alt="Corner Tape"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-contain object-top-right select-none"
+                      />
                     </div>
 
-                    <h3 className="text-[#0D121C] font-monaSans text-xs md:text-sm lg:text-base font-bold tracking-tight leading-snug">
-                      {step.title}
-                    </h3>
+                    {/* Konten Card */}
+                    <div className="flex flex-col h-full justify-center pl-1 pr-1.5 pt-1">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="w-6 h-6 rounded-md bg-gray-50 border border-gray-100 flex items-center justify-center text-[#0D121C] group-hover:bg-[#0D121C] group-hover:text-white transition-colors duration-300 shrink-0">
+                          <IconComponent className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-[10px] font-black text-gray-400 tracking-wider uppercase">
+                          STEP {step.stepNum}
+                        </span>
+                      </div>
 
-                    <p className="text-gray-500 font-inter text-[11px] lg:text-xs leading-relaxed mt-1">
-                      {step.description}
-                    </p>
+                      <h3 className="text-[#0D121C] font-monaSans text-sm md:text-[15px] lg:text-base font-bold tracking-tight leading-snug">
+                        {step.title}
+                      </h3>
+
+                      <p className="text-gray-500 font-inter text-[11px] lg:text-xs leading-relaxed mt-1 line-clamp-3">
+                        {step.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
               );

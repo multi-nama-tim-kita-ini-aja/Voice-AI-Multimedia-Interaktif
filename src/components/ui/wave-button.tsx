@@ -3,18 +3,21 @@
 import React from "react";
 
 interface WaveButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    children?: React.ReactNode;
+  children?: React.ReactNode;
+  size?: "default" | "sm";
 }
 
 export function CustomWaveButton({
-    children = "Start Quiz",
-    className = "",
-    ...props
+  children = "Start Quiz",
+  className = "",
+  size = "default",
+  ...props
 }: WaveButtonProps) {
-    return (
-        <>
-            <style jsx>{`
-        /* Posisi awal: busur tenggelam di bawah tombol */
+  const isSm = size === "sm";
+
+  return (
+    <>
+      <style jsx>{`
         .wave-layer {
           position: absolute;
           left: 50%;
@@ -25,7 +28,6 @@ export function CustomWaveButton({
           pointer-events: none;
         }
 
-        /* Saat di-hover: naik pelan bertingkat membentuk kubah setengah lingkaran */
         .group:hover .wave-yellow {
           transform: translate(-50%, 18%);
         }
@@ -41,31 +43,63 @@ export function CustomWaveButton({
         }
       `}</style>
 
-            <button
-                className={`group relative overflow-hidden h-14 px-10 rounded-full bg-white font-inter text-lg font-semibold tracking-tight shadow-[0_8px_20px_rgba(0,0,0,0.12)] active:scale-95 border-0 cursor-pointer select-none ${className}`}
-                {...props}
+      <button
+        className={`group relative overflow-hidden rounded-full bg-white font-inter font-semibold tracking-tight shadow-[0_4px_14px_rgba(0,0,0,0.08)] active:scale-95 border-0 cursor-pointer select-none transition-all [transform:translateZ(0)] ${
+          isSm
+            ? "h-10 px-6 text-xs md:text-sm"
+            : "h-14 px-10 text-lg shadow-[0_8px_20px_rgba(0,0,0,0.12)]"
+        } ${className}`}
+        {...props}
+      >
+        {/* Layer 1: Kuning */}
+        <span
+          className={`wave-layer wave-yellow bg-[#F5C77E] ${
+            isSm ? "w-[200px] h-[200px]" : "w-[260px] h-[260px]"
+          }`}
+        />
+
+        {/* Layer 2: Hijau Mint */}
+        <span
+          className={`wave-layer wave-mint bg-[#75C4AA] ${
+            isSm ? "w-[170px] h-[170px]" : "w-[220px] h-[220px]"
+          }`}
+        />
+
+        {/* Layer 3: Merah Coral */}
+        <span
+          className={`wave-layer wave-coral bg-[#E36961] ${
+            isSm ? "w-[140px] h-[140px]" : "w-[180px] h-[180px]"
+          }`}
+        />
+
+        {/* Text Rolling */}
+        <span
+          className={`relative z-10 block overflow-hidden pointer-events-none ${
+            isSm ? "h-5" : "h-6"
+          }`}
+        >
+          <span
+            className={`flex flex-col transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isSm ? "group-hover:-translate-y-5" : "group-hover:-translate-y-6"
+            }`}
+          >
+            <span
+              className={`flex items-center justify-center text-[#1A1A1A] ${
+                isSm ? "h-5" : "h-6"
+              }`}
             >
-                {/* Layer 1: Kuning (Lengkungan terluar di atas) */}
-                <span className="wave-layer wave-yellow w-[260px] h-[260px] bg-[#F5C77E]" />
-
-                {/* Layer 2: Hijau Mint */}
-                <span className="wave-layer wave-mint w-[220px] h-[220px] bg-[#75C4AA]" />
-
-                {/* Layer 3: Merah Coral (Kubah inti penopang teks) */}
-                <span className="wave-layer wave-coral w-[180px] h-[180px] bg-[#E36961]" />
-
-                {/* Text Rolling: Bergulir naik santai mengikuti gelombang */}
-                <span className="relative z-10 block h-6 overflow-hidden pointer-events-none">
-                    <span className="flex flex-col transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-6">
-                        <span className="h-6 flex items-center justify-center text-[#1A1A1A]">
-                            {children}
-                        </span>
-                        <span className="h-6 flex items-center justify-center text-white font-semibold">
-                            {children}
-                        </span>
-                    </span>
-                </span>
-            </button>
-        </>
-    );
+              {children}
+            </span>
+            <span
+              className={`flex items-center justify-center text-white font-semibold ${
+                isSm ? "h-5" : "h-6"
+              }`}
+            >
+              {children}
+            </span>
+          </span>
+        </span>
+      </button>
+    </>
+  );
 }
