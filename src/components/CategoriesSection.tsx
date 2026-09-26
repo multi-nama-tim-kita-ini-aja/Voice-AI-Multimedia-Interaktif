@@ -26,6 +26,7 @@ interface CategoryItem {
   badgeText: string;
   badgeBg: string;
   badgeColor: string;
+  imageSrc: string;
   accentBorder: string;
   // Posisi fan-out di desktop
   desktopPos: { x: number; y: number; rotate: number };
@@ -40,6 +41,7 @@ const CATEGORIES: CategoryItem[] = [
     badgeText: "Language",
     badgeBg: "bg-[#F4EAF5]",
     badgeColor: "text-[#EC68FD]",
+    imageSrc: "/cardenglish.png",
     accentBorder: "border-[#EC68FD]",
     desktopPos: { x: 0, y: -140, rotate: 3 },
     mobilePos: { x: 0, y: -130, rotate: 4 },
@@ -50,6 +52,7 @@ const CATEGORIES: CategoryItem[] = [
     badgeText: "Social",
     badgeBg: "bg-[#F4F8E8]",
     badgeColor: "text-[#93BA06]",
+    imageSrc: "/cardips.png",
     accentBorder: "border-[#93BA06]",
     desktopPos: { x: -240, y: 50, rotate: -8 },
     mobilePos: { x: -80, y: 40, rotate: -9 },
@@ -60,6 +63,7 @@ const CATEGORIES: CategoryItem[] = [
     badgeText: "Science",
     badgeBg: "bg-[#E5F2FA]",
     badgeColor: "text-[#039CFB]",
+    imageSrc: "/cardmatematika.png",
     accentBorder: "border-[#039CFB]",
     desktopPos: { x: 240, y: 70, rotate: 9 },
     mobilePos: { x: 80, y: 80, rotate: 9 },
@@ -219,14 +223,14 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
                     exit={{ scale: 0.5, opacity: 0, x: 0, y: 0, rotate: 0 }}
                     whileHover={{ scale: isSelected ? 1.12 : 1.06, zIndex: 40 }}
                     transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                    className={`absolute w-[220px] sm:w-[260px] md:w-[290px] h-[210px] sm:h-[240px] md:h-[260px] rounded-2xl bg-white flex flex-col overflow-hidden cursor-pointer text-left transition-shadow duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-20 ${
+                    className={`absolute w-[220px] sm:w-[260px] md:w-[290px] h-[210px] sm:h-[240px] md:h-[260px] rounded-2xl bg-white flex flex-col overflow-hidden cursor-pointer text-left transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-20 ${
                       isSelected
                         ? `ring-4 ring-offset-2 ${category.accentBorder} shadow-[10px_10px_0_0_rgba(0,0,0,0.2)] border-2`
                         : "shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 hover:shadow-[10px_10px_0_0_rgba(0,0,0,0.18)]"
                     }`}
                   >
                     {/* macOS Titlebar Header */}
-                    <div className="w-full h-7 sm:h-8 md:h-9 bg-neutral-100/90 border-b border-black/5 flex items-center px-3.5 gap-1.5 shrink-0 justify-between">
+                    <div className="w-full h-7 sm:h-8 md:h-9 bg-white/90 border-b border-black/5 flex items-center px-3.5 gap-1.5 shrink-0 justify-between z-10">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
                         <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
@@ -240,8 +244,16 @@ export default function CategoriesSection({ onSelectCategory }: CategoriesSectio
                       )}
                     </div>
 
-                    {/* Window Content Body */}
-                    <div className="flex-1 flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-white to-neutral-50">
+                    {/* Window Content Body with Card Image as Background */}
+                    <div className="relative flex-1 flex flex-col items-center justify-center p-5 text-center overflow-hidden">
+                      <Image
+                        src={category.imageSrc}
+                        alt={category.label}
+                        fill
+                        priority
+                        className="object-cover -z-10"
+                      />
+
                       {/* Badge Tag */}
                       <span className={`px-3 py-0.5 rounded-full text-xs font-semibold font-plusJakartaSans mb-2 ${category.badgeBg} ${category.badgeColor}`}>
                         {category.badgeText}
