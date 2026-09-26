@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import HowToPlay from "@/components/HowToPlay";
 import Image from "next/image";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AiMicIcon, SpeedTrain02Icon, RankingIcon } from "@hugeicons/core-free-icons";
 import { CustomWaveButton } from "@/components/ui/wave-button";
 
-// Structuring Nav Items 
+// Structuring Nav Items
 const NAV_ITEMS = [
   { id: "categories", title: "CATEGORIES", targetId: "categories" },
-  { id: "how-to-play", title: "HOW TO PLAY" }, // Khusus Modal
+  { id: "how-to-play", title: "HOW TO PLAY", targetId: "how-to-play" },
   { id: "leaderboard", title: "LEADERBOARD", targetId: "leaderboard" },
   { id: "audio-setup", title: "AUDIO SETUP", targetId: "audio-setup" },
   { id: "faqs", title: "FAQS", targetId: "faqs" },
@@ -18,17 +16,8 @@ const NAV_ITEMS = [
 ];
 
 export default function FooterSection() {
-  const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
-
-  // Handler klik 
+  // Handler klik
   const handleItemClick = (item: (typeof NAV_ITEMS)[0]) => {
-    console.log("CLICKED NAV:", item.title);
-
-    if (item.id === "how-to-play") {
-      setIsHowToPlayOpen(true);
-      return;
-    }
-
     if (item.targetId) {
       const targetElement = document.getElementById(item.targetId);
       if (targetElement) {
@@ -167,7 +156,7 @@ export default function FooterSection() {
         </div>
       </div>
 
-      {/* Footer Navigation Bar - Ditaruh paling atas dengan z-[99999] & pointer-events-auto */}
+      {/* Footer Navigation Bar */}
       <div className="relative z-[99999] flex px-[30px] pb-6 justify-between items-center w-full h-12 max-md:flex-col max-md:h-auto max-md:gap-3 max-md:px-4 max-md:pb-12 bg-transparent pointer-events-auto">
         <p className="text-[#1A1A1A] font-monaSans text-2xl font-semibold leading-6 tracking-[-0.0417em]">
           VoxIQ®
@@ -188,12 +177,6 @@ export default function FooterSection() {
           ))}
         </nav>
       </div>
-
-      {/* Render Modal How To Play */}
-      <HowToPlay
-        isOpen={isHowToPlayOpen}
-        onClose={() => setIsHowToPlayOpen(false)}
-      />
     </footer>
   );
 }
