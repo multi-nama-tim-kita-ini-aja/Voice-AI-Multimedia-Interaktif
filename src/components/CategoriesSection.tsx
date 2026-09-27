@@ -2,296 +2,224 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { GridIcon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { Grid02Icon } from "@hugeicons/core-free-icons";
+import CaseStudyModal, { ModalCardItem } from "./CaseStudyModal";
 
-import StarDoodle from "@/components/svg/StarDoodle";
-import WaveDoodle from "@/components/svg/WaveDoodle";
-import SpiralDoodle from "@/components/svg/SpiralDoodle";
-import ZigzagDoodle from "@/components/svg/ZigzagDoodle";
-import PaperPlaneDoodle from "@/components/svg/PaperPlaneDoodle";
-import AbstractCloudDoodle from "@/components/svg/AbstractCloudDoodle";
-import AbstractSwirlDoodle from "@/components/svg/AbstractSwirlDoodle";
-import AbstractLightningDoodle from "@/components/svg/AbstractLightningDoodle";
-import InteractiveCrossedEyes from "@/components/InteractiveCrossedEyes";
-
-interface CategoriesSectionProps {
-  onSelectCategory?: (id: string) => void;
+interface CategoryCardItem extends ModalCardItem {
+  categoryTag: string;
+  categoryTag2: string;
+  categoryTag3: string;
+  tilt: string;
 }
 
-interface CategoryItem {
-  id: string;
-  label: string;
-  badgeText: string;
-  badgeBg: string;
-  badgeColor: string;
-  bgImage: string;
-  photo: string;
-  accentBorder: string;
-  // Posisi fan-out di desktop
-  desktopPos: { x: number; y: number; rotate: number };
-  // Posisi fan-out di mobile
-  mobilePos: { x: number; y: number; rotate: number };
-}
-
-const CATEGORIES: CategoryItem[] = [
+const CATEGORIES: CategoryCardItem[] = [
   {
-    id: "english",
-    label: "ENGLISH",
-    badgeText: "Language",
-    badgeBg: "bg-[#F4EAF5]",
-    badgeColor: "text-[#EC68FD]",
-    bgImage: "/cardenglish.png",
-    photo: "/photo-english.png",
-    accentBorder: "border-[#EC68FD]",
-    desktopPos: { x: 0, y: -120, rotate: 3 },
-    mobilePos: { x: 0, y: -110, rotate: 4 },
+    id: "mtk",
+    title: "Mathematics",
+    image: "/bukit-hero.png",
+    categoryTag: "Algebra",
+    categoryTag2: "Logic",
+    categoryTag3: "Calculus",
+    tilt: "rotate-[6deg]",
+    detail: {
+      totalQuestions: "10 Questions",
+      timeperQ: "20 Seconds",
+      difficultyLevel: "Hard",
+      micStatus: "Active & Required",
+      description:
+        "Sharpen your mental calculation and logical thinking! Speak your numerical answers or formulas aloud before time ticks away.",
+      previewUrl: "https://figma.com",
+    },
+  },
+  {
+    id: "ipa",
+    title: "Science",
+    image: "/bukit-hero.png",
+    categoryTag: "Physics",
+    categoryTag2: "Lab Equipment",
+    categoryTag3: "Space",
+    tilt: "-rotate-[5deg]",
+    detail: {
+      totalQuestions: "10 Questions",
+      timeperQ: "15 Seconds",
+      difficultyLevel: "Medium",
+      micStatus: "Active & Required",
+      description:
+        "Test your knowledge of the universe, physics, and biology! Speak clearly to answer questions before the timer runs out and earn streak points.",
+      previewUrl: "https://figma.com",
+    },
   },
   {
     id: "ips",
-    label: "IPS",
-    badgeText: "Social",
-    badgeBg: "bg-[#F4F8E8]",
-    badgeColor: "text-[#93BA06]",
-    bgImage: "/cardips.png",
-    photo: "/photo-ips.png",
-    accentBorder: "border-[#93BA06]",
-    desktopPos: { x: -260, y: 35, rotate: -8 },
-    mobilePos: { x: -70, y: 30, rotate: -9 },
-  },
-  {
-    id: "matematika",
-    label: "MATEMATIKA",
-    badgeText: "Science",
-    badgeBg: "bg-[#E5F2FA]",
-    badgeColor: "text-[#039CFB]",
-    bgImage: "/cardmatematika.png",
-    photo: "/photo-matematika.png",
-    accentBorder: "border-[#039CFB]",
-    desktopPos: { x: 260, y: 55, rotate: 9 },
-    mobilePos: { x: 70, y: 65, rotate: 9 },
+    title: "Social Studies",
+    image: "/bukit-hero.png",
+    categoryTag: "History",
+    categoryTag2: "Geo",
+    categoryTag3: "Politics",
+    tilt: "-rotate-[3deg]",
+    detail: {
+      totalQuestions: "12 Questions",
+      timeperQ: "15 Seconds",
+      difficultyLevel: "Easy-Medium",
+      micStatus: "Active & Required",
+      description:
+        "Journey through world history, geography, and cultural trivia. Voice your answers quickly to unlock bonus combo points!",
+      previewUrl: "https://framer.com",
+    },
   },
 ];
 
-export default function CategoriesSection({ onSelectCategory }: CategoriesSectionProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  const isExpanded = isHovered || isMobileExpanded;
-
-  const handleSelect = (id: string) => {
-    setSelectedCategory(id);
-    console.log("Selected category:", id);
-    // TODO: wire ke halaman/logic mulai quiz nanti
-    if (onSelectCategory) {
-      onSelectCategory(id);
-    }
-  };
-
-  const toggleMobileExpand = () => {
-    setIsMobileExpanded((prev) => !prev);
-  };
+export default function CategorySection() {
+  const [activeCard, setActiveCard] = useState<string | null>(null);
+  const [selectedModalCard, setSelectedModalCard] = useState<CategoryCardItem | null>(null);
 
   return (
     <section
       id="categories"
-      className="relative w-full min-h-screen py-16 md:py-24 px-4 overflow-hidden flex flex-col justify-center items-center select-none"
+      className="relative w-full py-20 md:py-28 px-4 overflow-hidden flex flex-col justify-center items-center select-none"
+      onClick={() => setActiveCard(null)}
     >
-      {/* Background Image (Persis seperti HeroSection) */}
-      <Image
-        src="/categories-bg2.png"
-        alt="Categories Background"
-        fill
-        priority
-        className="object-cover -z-10"
-      />
-
-      {/* Doodles Dekoratif (hidden md:block) */}
-      <StarDoodle className="hidden md:block w-20 h-20 text-yellow-400 absolute top-16 left-20 -rotate-12 pointer-events-none z-10" />
-      <WaveDoodle className="hidden md:block w-24 h-12 text-sky-400 absolute top-28 right-24 rotate-6 pointer-events-none z-10" />
-      <PaperPlaneDoodle className="hidden md:block w-16 h-12 text-white/90 absolute bottom-32 left-28 -rotate-12 pointer-events-none z-10" />
-      <SpiralDoodle className="hidden md:block w-20 h-20 text-lime-400 absolute bottom-24 right-32 rotate-45 pointer-events-none z-10" />
-      <ZigzagDoodle className="hidden md:block w-20 h-10 text-violet-400 absolute top-1/2 right-12 -rotate-12 pointer-events-none z-10" />
-
-      {/* Abstract SVGs tambahan */}
-      <AbstractCloudDoodle className="hidden md:block w-28 h-22 text-[#EC68FD]/80 absolute top-24 left-10 -rotate-6 pointer-events-none z-10" />
-      <AbstractSwirlDoodle className="hidden md:block w-36 h-20 text-amber-300/85 absolute bottom-16 left-14 rotate-12 pointer-events-none z-10" />
-      <AbstractLightningDoodle className="hidden md:block w-14 h-24 text-[#93BA06]/85 absolute top-36 right-16 rotate-12 pointer-events-none z-10" />
-
-      {/* Header Content */}
-      <div className="flex flex-col justify-center items-center gap-3 z-20 mb-12 md:mb-20 text-center max-w-[700px]">
-        {/* Category Header Badge */}
-        <div className="relative inline-flex items-center justify-center mb-1">
-          <div className="flex py-1 px-3.5 justify-center items-center gap-2 rounded-[8px] bg-white/90 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.08)] border border-white/80 -rotate-2">
-            <HugeiconsIcon icon={GridIcon} size={16} className="text-[#212121]" />
-            <p className="text-[#212121] font-plusJakartaSans text-xs md:text-sm font-bold tracking-tight">
-              GAME MODES
-            </p>
-          </div>
-        </div>
-
-        {/* Main Title */}
-        <h2 className="text-[#FFF] font-monaSans text-[36px] sm:text-[48px] md:text-[56px] font-extrabold leading-[1.05] tracking-[-0.04em] drop-shadow-md">
-          CHOOSE YOUR CATEGORY
-        </h2>
-        <p className="text-white/90 font-inter text-sm md:text-base font-medium tracking-tight max-w-[480px]">
-          Hover or tap the window below to reveal available quiz categories & pick your challenge!
-        </p>
+      {/* Background Gambar Bukit: Redup & Matte */}
+      <div className="absolute inset-0 -z-10 pointer-events-none select-none overflow-hidden">
+        <Image
+          src="/categories-bg.png"
+          alt="Hill Background"
+          fill
+          priority
+          className="object-cover object-center brightness-[0.78] contrast-[0.9] saturate-[0.88]"
+        />
+        <div className="absolute inset-0 bg-[#1e293b]/10 mix-blend-multiply" />
       </div>
 
-      {/* Interactive Window Picker Area */}
-      <div
-        className="relative w-full max-w-[1000px] h-[420px] md:h-[480px] flex items-center justify-center z-20"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* State 1: IDLE Window (Cover card "CATEGORY") */}
-        <AnimatePresence>
-          {!isExpanded && (
-            <motion.button
-              type="button"
-              onClick={toggleMobileExpand}
-              aria-label="Buka pilihan kategori kuis"
-              initial={{ scale: 0.9, opacity: 0, rotate: -6 }}
-              animate={{ scale: 1, opacity: 1, rotate: -6 }}
-              exit={{ scale: 0.85, opacity: 0, rotate: -12 }}
-              whileHover={{ scale: 1.04, rotate: -4 }}
-              transition={{ type: "spring", stiffness: 350, damping: 25 }}
-              className="absolute w-[240px] sm:w-[270px] md:w-[300px] h-[200px] sm:h-[220px] md:h-[240px] rounded-2xl bg-white shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 flex flex-col overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-30"
+      <div className="relative w-full max-w-[1240px] flex flex-col items-center z-20">
+        {/* Section Header */}
+        <div className="flex flex-col items-center mb-16 md:mb-20 relative select-none pt-4">
+          <div className="relative inline-block">
+            {/* Tag Badge Category */}
+            <div className="w-[104px] md:w-[118px] h-[48px] md:h-[54px] absolute -top-11 left-80 -translate-x-1/2 md:translate-x-0 md:left-[-45px] md:-top-10 rotate-[12deg] md:-rotate-[12deg] z-30 pointer-events-none select-none scale-90 md:scale-100">
+              <div className="flex py-[2px] md:py-[3px] px-2 justify-center items-center gap-[3px] rounded-[5.2px] bg-[#E5F2FA] shadow-[0_0_7px_0_rgba(0,0,0,0.06)] w-full h-[30px] md:h-[34px] absolute left-0 top-4 md:top-5 overflow-hidden">
+                <div className="flex flex-col items-center shrink-0 w-[80px] md:w-[98px]">
+                  <p className="text-[#212121] font-plusJakartaSans text-[11px] md:text-[13px] font-semibold leading-[15.62px] w-fit">
+                    Categories
+                  </p>
+                </div>
+              <Image
+                src="/paper-blue2.png"
+                alt="Paper Blue"
+                width={13}
+                height={13}
+                className="absolute -right-px -top-0.5"
+              />
+            </div>
+
+            {/* Circle Icon Badge */}
+            <div className="flex justify-center items-center rounded-full bg-[#039CFB] shadow-[-1.4px_2.1px_1.4px_0_rgba(0,0,0,0.24)] w-[26px] h-[26px] md:w-[29px] md:h-[29px] absolute left-1 top-px border-[0.93px] border-[#FFF]">
+              <HugeiconsIcon
+                icon={Grid02Icon}
+                size={14}
+                className="text-white shrink-0"
+              />
+            </div>
+          </div>
+
+          <h2 className="text-[#252525] font-monaSans text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center leading-tight">
+            CHOOSE WHAT YOU KNOW
+          </h2>
+        </div>
+      </div>
+
+      {/* 3 Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-x-16 md:gap-y-16 w-full max-w-[720px] justify-items-center">
+        {CATEGORIES.map((item, index) => {
+          const isActive = activeCard === item.id;
+          const isLast = index === 2;
+
+          return (
+            <div
+              key={item.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveCard(item.id);
+                setSelectedModalCard(item);
+              }}
+              className={`group relative cursor-pointer transition-all duration-300 w-[305px] h-[275px] rounded-[16px] bg-white border border-white/90 p-1 flex flex-col justify-between shadow-[0_14px_30px_rgba(0,0,0,0.2)] ${item.tilt
+                } ${isLast ? "md:col-span-2 md:justify-self-center -translate-y-2" : ""
+                } ${isActive
+                  ? "scale-105 z-30 shadow-[0_22px_44px_rgba(0,0,0,0.3)]"
+                  : "hover:shadow-[0_18px_36px_rgba(0,0,0,0.25)]"
+                }`}
             >
-              {/* macOS Titlebar Header */}
-              <div className="w-full h-8 sm:h-9 md:h-10 bg-neutral-100/90 border-b border-black/5 flex items-center px-3.5 gap-2 shrink-0">
-                <div className="w-3 h-3 rounded-full bg-[#FF5F57] shadow-inner" />
-                <div className="w-3 h-3 rounded-full bg-[#FEBC2E] shadow-inner" />
-                <div className="w-3 h-3 rounded-full bg-[#28C840] shadow-inner" />
-                <span className="ml-auto text-[10px] font-mono font-semibold text-neutral-400 uppercase tracking-widest">
-                  VoxIQ macOS
-                </span>
+              {/* Paperclip */}
+              <div className="absolute -top-3.5 right-12 w-6 h-10 pointer-events-none z-30 select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)] -rotate-[30deg]">
+                <svg viewBox="0 0 24 40" fill="none" className="w-full h-full">
+                  <path
+                    d="M7 10V27C7 29.5 9 31.5 11.5 31.5C14 31.5 16 29.5 16 27V7C16 4.5 14 2.5 11.5 2.5C9 2.5 7 4.5 7 7V25C7 26.5 8 27.5 9.5 27.5C11 27.5 12 26.5 12 25V10"
+                    stroke="#4B91E2"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </div>
 
-              {/* Window Body */}
-              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-white to-neutral-50/50">
-                <p className="text-[#212121] font-monaSans text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-[-0.04em] uppercase">
-                  CATEGORY
+              {/* Background Garis Gelombang Halus */}
+              <div className="absolute inset-0 pointer-events-none select-none z-0 opacity-15 overflow-hidden rounded-[16px]">
+                <svg viewBox="0 0 295 262" fill="none" className="w-full h-full">
+                  <path d="M-20 80 C60 120, 100 200, 110 280" stroke="#38BDF8" strokeWidth="1.2" />
+                  <path d="M100 -20 C110 40, 180 80, 310 50" stroke="#38BDF8" strokeWidth="1.2" />
+                  <path d="M220 280 C230 220, 280 200, 320 210" stroke="#38BDF8" strokeWidth="1.2" />
+                </svg>
+              </div>
+
+              {/* macOS Dots */}
+              <div className="relative z-10 flex items-center gap-1 px-1 pt-1 pb-2 shrink-0">
+                <span className="w-[8px] h-[8px] rounded-full bg-[#FD5D5C] inline-block shadow-sm" />
+                <span className="w-[8px] h-[8px] rounded-full bg-[#FAC900] inline-block shadow-sm" />
+                <span className="w-[8px] h-[8px] rounded-full bg-[#34C75A] inline-block shadow-sm" />
+              </div>
+
+              {/* Kontainer Preview Gambar */}
+              <div className="relative z-10 w-full h-[200px] rounded-[10px] overflow-hidden border border-black/10 bg-black/5 shadow-inner">
+                {/* Gambar: Zoom halus + menggelap perlahan */}
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  fill
+                  className="object-cover object-top transition-all duration-300 ease-out group-hover:scale-105 group-hover:brightness-[0.82]"
+                />
+                {/* Lapisan halus tambahan untuk nuansa sinematik */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/2 transition-colors duration-700 pointer-events-none" />
+              </div>
+
+              {/* Footer: Title & Tag Badges */}
+              <div className="relative z-10 flex items-center justify-between px-1.5 pt-2 pb-0.5 shrink-0">
+                <p className="text-[#252525] font-monaSans text-2xl font-bold tracking-tight">
+                  {item.title}
                 </p>
-                <div className="mt-4 px-3 py-1 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold font-inter animate-pulse">
-                  Hover / Tap to Expand ✨
+
+                <div className="flex items-center gap-1">
+                  <span className="px-1.5 py-0.5 rounded-[5px] bg-black/[0.04] text-[#444] font-monaSans text-[9px] font-medium tracking-tight">
+                    {item.categoryTag}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-[4px] bg-black/[0.04] text-[#444] font-monaSans text-[9px] font-medium tracking-tight">
+                    {item.categoryTag2}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded-[4px] bg-black/[0.04] text-[#444] font-monaSans text-[9px] font-medium tracking-tight">
+                    {item.categoryTag3}
+                  </span>
                 </div>
               </div>
-            </motion.button>
-          )}
-        </AnimatePresence>
-
-        {/* State 2 & 3: FAN-OUT Cards (Categories Options) */}
-        <AnimatePresence>
-          {isExpanded && (
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* Mata Interaktif Juling (Muncul tepat di tengah gap kartu saat hover/expand) */}
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 350, damping: 22 }}
-                className="hidden md:flex absolute top-[70%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none"
-              >
-                <InteractiveCrossedEyes size={48} />
-              </motion.div>
-
-              {CATEGORIES.map((category) => {
-                const isSelected = selectedCategory === category.id;
-
-                return (
-                  <motion.button
-                    key={category.id}
-                    type="button"
-                    onClick={() => handleSelect(category.id)}
-                    aria-label={`Pilih kategori ${category.label}`}
-                    initial={{ scale: 0.5, opacity: 0, x: 0, y: 0, rotate: 0 }}
-                    animate={{
-                      scale: isSelected ? 1.08 : 1,
-                      opacity: 1,
-                      x: typeof window !== "undefined" && window.innerWidth < 768
-                        ? category.mobilePos.x
-                        : category.desktopPos.x,
-                      y: typeof window !== "undefined" && window.innerWidth < 768
-                        ? category.mobilePos.y
-                        : category.desktopPos.y,
-                      rotate: isSelected ? 0 : (
-                        typeof window !== "undefined" && window.innerWidth < 768
-                          ? category.mobilePos.rotate
-                          : category.desktopPos.rotate
-                      ),
-                    }}
-                    exit={{ scale: 0.5, opacity: 0, x: 0, y: 0, rotate: 0 }}
-                    whileHover={{ scale: isSelected ? 1.12 : 1.06, zIndex: 40 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                    className={`absolute w-[260px] sm:w-[280px] md:w-[300px] h-[300px] sm:h-[320px] md:h-[340px] rounded-2xl bg-white flex flex-col overflow-hidden cursor-pointer text-left transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white z-20 ${isSelected
-                      ? `ring-4 ring-offset-2 ${category.accentBorder} shadow-[10px_10px_0_0_rgba(0,0,0,0.2)] border-2`
-                      : "shadow-[6px_6px_0_0_rgba(0,0,0,0.12)] md:shadow-[8px_8px_0_0_rgba(0,0,0,0.15)] border border-black/10 hover:shadow-[10px_10px_0_0_rgba(0,0,0,0.18)]"
-                      }`}
-                  >
-                    {/* LAYER -10: Background Skin (cardenglish.png / cardips.png / cardmatematika.png) */}
-                    <Image
-                      src={category.bgImage}
-                      alt={`${category.label} skin`}
-                      fill
-                      priority
-                      className="object-cover -z-10 rounded-2xl"
-                      sizes="(max-width: 768px) 100vw, 300px"
-                    />
-
-                    {/* LAYER z-20: macOS Titlebar Header */}
-                    <div className="w-full h-7 sm:h-8 bg-white/80 backdrop-blur-sm border-b border-black/5 flex items-center px-3.5 gap-1.5 shrink-0 justify-between z-20">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E]" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#28C840]" />
-                      </div>
-                      {isSelected && (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                          <HugeiconsIcon icon={CheckmarkCircle02Icon} size={12} />
-                          <span>SELECTED</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* LAYER z-20: Card Body Content */}
-                    <div className="relative flex-1 flex flex-col items-center justify-between p-2.5 sm:p-3 text-center overflow-hidden z-20">
-                      {/* Badge Tag Kategori */}
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-plusJakartaSans ${category.badgeBg} ${category.badgeColor}`}>
-                        {category.badgeText}
-                      </span>
-
-                      {/* Slot Foto Tematik */}
-                      <div className="relative w-full max-w-[250px] h-[135px] sm:h-[150px] md:h-[160px] rounded-xl overflow-hidden border border-black/10 shadow-sm bg-neutral-100/80 z-20 shrink-0 my-1">
-                        <Image
-                          src={category.photo}
-                          alt={`${category.label} photo`}
-                          fill
-                          sizes="250px"
-                          className="object-cover"
-                        />
-                      </div>
-
-                      {/* Label Kategori */}
-                      <p className="text-[#212121] font-monaSans text-lg sm:text-xl md:text-2xl font-extrabold tracking-[-0.03em] uppercase">
-                        {category.label}
-                      </p>
-
-                      {/* Teks Instruksi */}
-                      <p className="text-[10px] sm:text-[11px] text-neutral-500 font-inter">
-                        {isSelected ? "Tap again to confirm" : "Click to select"}
-                      </p>
-                    </div>
-                  </motion.button>
-                );
-              })}
             </div>
-          )}
-        </AnimatePresence>
+          );
+        })}
       </div>
-    </section>
+    </div>
+
+      {/* Komponen Modal Terpisah */ }
+  <CaseStudyModal
+    card={selectedModalCard}
+    onClose={() => setSelectedModalCard(null)}
+  />
+    </section >
   );
 }
