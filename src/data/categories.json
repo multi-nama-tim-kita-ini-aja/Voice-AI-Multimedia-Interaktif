@@ -1,0 +1,96 @@
+[
+  {
+    "id": "mtk",
+    "title": "Mathematics",
+    "image": "/bukit-hero.png",
+    "categoryTag": "Algebra",
+    
+    "categoryTag2": "Logic",
+    "categoryTag3": "Calculus",
+    "tilt": "rotate-[6deg]",
+    "description": "Sharpen your mental calculation and logical thinking! Speak your numerical answers or formulas aloud before time ticks away.",
+    "previewUrl": "https://figma.com",
+    "levels": {
+      "1": {
+        "levelName": "Level 1 (Basic)",
+        "totalQuestions": "8 Questions",
+        "timePerQ": "25 Seconds",
+        "description": "Simple arithmetic, fast mental calculations, and core number logic."
+      },
+      "2": {
+        "levelName": "Level 2 (Intermediate)",
+        "totalQuestions": "10 Questions",
+        "timePerQ": "20 Seconds",
+        "description": "Linear equations, powers, roots, and applied geometry problems."
+      },
+      "3": {
+        "levelName": "Level 3 (Advanced)",
+        "totalQuestions": "12 Questions",
+        "timePerQ": "15 Seconds",
+        "description": "Complex mental algebra, tricky sequences, and time-pressured math riddles."
+      }
+    }
+  },
+  {
+    "id": "ipa",
+    "title": "Science",
+    "image": "/bukit-hero.png",
+    "categoryTag": "Physics",
+    "categoryTag2": "Lab Equipment",
+    "categoryTag3": "Space",
+    "tilt": "-rotate-[5deg]",
+    "description": "Test your knowledge of the universe, physics, and biology! Speak clearly to answer questions before the timer runs out and earn streak points.",
+    "previewUrl": "https://figma.com",
+    "levels": {
+      "1": {
+        "levelName": "Level 1 (Explorer)",
+        "totalQuestions": "8 Questions",
+        "timePerQ": "20 Seconds",
+        "description": "Solar system basics, animal kingdoms, and common natural phenomena."
+      },
+      "2": {
+        "levelName": "Level 2 (Researcher)",
+        "totalQuestions": "10 Questions",
+        "timePerQ": "15 Seconds",
+        "description": "Chemical reactions, laws of motion, human anatomy, and ecosystems."
+      },
+      "3": {
+        "levelName": "Level 3 (Scientist)",
+        "totalQuestions": "12 Questions",
+        "timePerQ": "12 Seconds",
+        "description": "Deep astrophysics, quantum theory trivia, and complex biological processes."
+      }
+    }
+  },
+  {
+    "id": "ips",
+    "title": "Social Studies",
+    "image": "/bukit-hero.png",
+    "categoryTag": "History",
+    "categoryTag2": "Geo",
+    "categoryTag3": "Politics",
+    "tilt": "-rotate-[3deg]",
+    "description": "Journey through world history, geography, and cultural trivia. Voice your answers quickly to unlock bonus combo points!",
+    "previewUrl": "https://framer.com",
+    "levels": {
+      "1": {
+        "levelName": "Level 1 (Traveler)",
+        "totalQuestions": "8 Questions",
+        "timePerQ": "20 Seconds",
+        "description": "Country capitals, famous world flags, and basic cultural landmarks."
+      },
+      "2": {
+        "levelName": "Level 2 (Historian)",
+        "totalQuestions": "10 Questions",
+        "timePerQ": "15 Seconds",
+        "description": "Major world wars, geopolitical shifts, and ancient civilizations."
+      },
+      "3": {
+        "levelName": "Level 3 (Diplomat)",
+        "totalQuestions": "12 Questions",
+        "timePerQ": "12 Seconds",
+        "description": "Economic treaties, constitutional history, and rapid-fire global trivia."
+      }
+    }
+  }
+]
