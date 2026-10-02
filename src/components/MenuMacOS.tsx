@@ -12,9 +12,9 @@ interface MenuItem {
 
 const MENU_ITEMS: MenuItem[] = [
   { id: "categories", title: "Categories", icon: "/notes.png", targetId: "categories" },
-  { id: "projects", title: "Projects", icon: "/picture.png", targetId: "projects" },
-  { id: "services", title: "Services", icon: "/face.png", targetId: "services" },
-  { id: "contact", title: "Contact", icon: "/contact.png", targetId: "footer" },
+  { id: "leaderboard", title: "Leaderboard", icon: "/picture.png", targetId: "leaderboard" },
+  { id: "faqs", title: "FAQs", icon: "/face.png", targetId: "faqs" },
+  { id: "footer", title: "Footer", icon: "/contact.png", targetId: "footer" },
 ];
 
 export default function MenuMac() {
@@ -26,7 +26,6 @@ export default function MenuMac() {
       const scrollPosition = window.innerHeight + window.scrollY;
       const documentHeight = document.documentElement.scrollHeight;
 
-      // Sembunyikan dock jika sisa jarak ke dasar halaman kurang dari 120px
       const isNearBottom = documentHeight - scrollPosition <= 120;
       setIsVisible(!isNearBottom);
     };

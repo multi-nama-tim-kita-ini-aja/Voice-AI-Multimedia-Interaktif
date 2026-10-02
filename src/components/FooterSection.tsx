@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AiMicIcon, SpeedTrain02Icon, RankingIcon } from "@hugeicons/core-free-icons";
-import { Button } from "@/components/ui/button";
+import {
+  AiMicIcon,
+  SpeedTrain02Icon,
+  RankingIcon,
+} from "@hugeicons/core-free-icons";
 import { CustomWaveButton } from "@/components/ui/wave-button";
 
 export default function FooterSection() {
@@ -53,7 +58,6 @@ export default function FooterSection() {
 
           {/* Bottom Left Title & Badges */}
           <div className="w-[436px] h-[212px] absolute left-6 top-[468px] max-md:left-3.5 max-md:bottom-3 max-md:top-auto max-md:w-[calc(100%-28px)] max-md:h-auto z-20">
-
             {/* Judul: Font padat dan rapat persis referensi */}
             <p className="text-[#FFF] font-monaSans text-[56px] font-extrabold leading-[50.4px] w-[436px] h-[152px] absolute left-0 top-[68px] tracking-[-0.0357em] max-md:static max-md:w-[270px] max-md:h-auto max-md:text-[34px] max-md:leading-[0.95] max-md:tracking-[-0.04em]">
               SPEAK UP AND CLAIM THE VICTORY
@@ -127,28 +131,40 @@ export default function FooterSection() {
                 />
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* Footer Navigation Bar: Desktop tetap sama, mobile rapi */}
+      {/* Footer Navigation Bar */}
       <div className="flex px-[30px] pb-6 justify-between items-center w-full h-12 max-md:flex-col max-md:h-auto max-md:gap-3 max-md:px-4 max-md:pb-12">
         <p className="text-[#1A1A1A] font-monaSans text-2xl font-semibold leading-6 tracking-[-0.0417em]">
           VoxIQ®
         </p>
         <nav className="flex items-center gap-[18px] max-md:flex-wrap max-md:justify-center max-md:gap-x-3 max-md:gap-y-1.5">
-          {["CATEGORIES", "HOW TO PLAY", "LEADERBOARD", "AUDIO SETUP", "FAQS", "SUPPORT"].map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase().replace(/\s+/g, "-")}`}
-              className="text-[#1A1A1A] font-monaSans text-base font-medium leading-[20.8px] tracking-[-0.0125em] hover:opacity-75 transition-opacity max-md:text-[11px]"
-            >
-              {link}
-            </a>
-          ))}
+          {["HOW TO PLAY", "CATEGORIES", "LEADERBOARD", "FAQS"].map((link) => {
+            const targetId = link.toLowerCase().replace(/\s+/g, "-");
+
+            const handleScroll = (e: React.MouseEvent) => {
+              e.preventDefault();
+              const element = document.getElementById(targetId);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            };
+
+            return (
+              <button
+                key={link}
+                type="button"
+                onClick={handleScroll}
+                className="text-[#1A1A1A] font-monaSans text-base font-medium leading-[20.8px] tracking-[-0.0125em] hover:opacity-75 transition-opacity max-md:text-[11px] cursor-pointer bg-transparent border-0 p-0"
+              >
+                {link}
+              </button>
+            );
+          })}
         </nav>
       </div>
-    </footer >
+    </footer>
   );
 }
