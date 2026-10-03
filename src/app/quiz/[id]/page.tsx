@@ -27,6 +27,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
 
   const initialTime = level === "3" ? 15 : level === "2" ? 20 : 25;
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   // States Alur User & Game
   const [username, setUsername] = useState("");
@@ -57,10 +58,65 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const currentQuestionRef = useRef<MultipleChoiceQuestion | null>(null);
 
-  // Selalu sinkronkan ref pertanyaan aktif
+  // Refs untuk akses state terbaru tanpa re-create recognition
+  const isMicEnabledRef = useRef(isMicEnabled);
+  const isAiSpeakingRef = useRef(isAiSpeaking);
+  const isEvaluatingRef = useRef(isEvaluating);
+  const gameStartedRef = useRef(gameStarted);
+  const isFinishedRef = useRef(isFinished);
+
+  // Selalu sinkronkan ref pertanyaan aktif & state refs
   useEffect(() => {
     currentQuestionRef.current = currentQuestion;
   }, [currentQuestion]);
+
+  useEffect(() => {
+    isMicEnabledRef.current = isMicEnabled;
+  }, [isMicEnabled]);
+
+  useEffect(() => {
+    isAiSpeakingRef.current = isAiSpeaking;
+  }, [isAiSpeaking]);
+
+  useEffect(() => {
+    isEvaluatingRef.current = isEvaluating;
+  }, [isEvaluating]);
+
+  useEffect(() => {
+    gameStartedRef.current = gameStarted;
+  }, [gameStarted]);
+
+  useEffect(() => {
+    isFinishedRef.current = isFinished;
+  }, [isFinished]);
+
+  // Helper: Matikan mic secara paksa (stop recognition)
+  const stopMic = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch { }
+    }
+    // Hapus pending silence timer agar transkrip lama tidak terkirim
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }, []);
+
+  // Helper: Nyalakan mic kembali (start recognition)
+  const startMic = useCallback(() => {
+    if (
+      recognitionRef.current &&
+      isMicEnabledRef.current &&
+      !isTransitioningRef.current &&
+      !isFinishedRef.current
+    ) {
+      try {
+        recognitionRef.current.start();
+      } catch { }
+    }
+  }, []);
 
   // 1. Text-to-Speech (TTS) Suara AI yang Bersih dari Canceled Error
   const speakText = useCallback(
@@ -93,25 +149,20 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       }
 
       utterance.onstart = () => {
+        console.log("🔊 [AI SPEAKING] Mic dimatikan otomatis");
         setIsAiSpeaking(true);
-        if (recognitionRef.current) {
-          try {
-            recognitionRef.current.abort();
-          } catch {}
-        }
+        // MATIKAN mic saat AI mulai bicara agar tidak menangkap suara AI
+        stopMic();
       };
 
       utterance.onend = () => {
+        console.log("🔇 [AI SELESAI] Mic dinyalakan kembali");
         setIsAiSpeaking(false);
-        if (
-          recognitionRef.current &&
-          isMicEnabled &&
-          !isTransitioningRef.current
-        ) {
-          try {
-            recognitionRef.current.start();
-          } catch {}
-        }
+        // Beri jeda 300ms setelah AI selesai baru nyalakan mic
+        // agar sisa echo AI tidak tertangkap
+        setTimeout(() => {
+          startMic();
+        }, 300);
         if (onEnd) onEnd();
       };
 
@@ -119,10 +170,17 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         // Abaikan jika error hanya karena 'canceled' atau 'interrupted'
         if (e.error === "canceled" || e.error === "interrupted") {
           setIsAiSpeaking(false);
+          // Tetap coba nyalakan mic meski ada cancel
+          setTimeout(() => {
+            startMic();
+          }, 300);
           return;
         }
         console.warn("SpeechSynthesis warning:", e.error || e);
         setIsAiSpeaking(false);
+        setTimeout(() => {
+          startMic();
+        }, 300);
         if (onEnd) onEnd();
       };
 
@@ -135,7 +193,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         }
       }, 80);
     },
-    [isMicEnabled],
+    [stopMic, startMic],
   );
 
   // Pastikan daftar suara browser siap
@@ -154,6 +212,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     setIsAnswerCorrect(null);
     setAiFeedback(null);
     setTranscript("");
+    setIsTimerRunning(false); // ⏸️ Pause timer sampai AI selesai baca soal baru
 
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
@@ -164,14 +223,181 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     }
   }, [currentIndex, questions.length, initialTime, speakText]);
 
-  // 3. Kirim Transkrip Suara ke /api/judge
+  // ---- LOCAL FAST-PATH: Deteksi jawaban jelas tanpa panggil API ----
+  const SKIP_WORDS = ["next", "lanjut", "skip", "lewati", "lewat", "pas", "ga tau", "nggak tau", "gak tau", "tidak tahu", "ga tahu", "nggak tahu"];
+  const EXIT_WORDS = ["keluar", "exit", "quit", "berhenti", "stop", "selesai", "pulang", "udahan", "udah aja", "cukup", "menyerah", "nyerah", "cabut", "pergi"];
+
+  const CORRECT_FEEDBACKS = [
+    "Mantap! Jawabanmu benar, keren banget!",
+    "Wah hebat, itu jawaban yang tepat!",
+    "Benar sekali! Kamu memang jago!",
+    "Yay, tepat! Lanjutkan semangatnya!",
+    "Sip, jawaban kamu benar! Luar biasa!",
+  ];
+
+  const WRONG_FEEDBACKS = [
+    (correctKey: string, correctText: string) =>
+      `Hmm sayang, jawaban yang benar adalah ${correctKey}, ${correctText}.`,
+    (correctKey: string, correctText: string) =>
+      `Belum tepat ya, yang benar itu ${correctKey}, yaitu ${correctText}.`,
+    (correctKey: string, correctText: string) =>
+      `Oops, kurang tepat! Jawaban benarnya ${correctKey}, ${correctText}.`,
+  ];
+
+  const getRandomItem = <T,>(arr: T[]): T =>
+    arr[Math.floor(Math.random() * arr.length)];
+
+  // Fungsi cepat untuk mencocokkan ucapan ke opsi A/B/C/D secara lokal
+  const tryLocalMatch = useCallback(
+    (
+      speech: string,
+      question: MultipleChoiceQuestion,
+    ): {
+      action: "ANSWER" | "SKIP" | "EXIT" | null;
+      selectedKey: "A" | "B" | "C" | "D" | null;
+      isCorrect: boolean;
+      feedbackSpeech: string;
+    } | null => {
+      const lower = speech.toLowerCase().trim();
+
+      // 0. Cek EXIT (keluar dari quiz)
+      if (EXIT_WORDS.some((w) => lower.includes(w))) {
+        return {
+          action: "EXIT",
+          selectedKey: null,
+          isCorrect: false,
+          feedbackSpeech: "Oke, kita akhiri kuisnya di sini. Sampai jumpa lagi!",
+        };
+      }
+
+      // 1. Cek SKIP
+      if (SKIP_WORDS.some((w) => lower.includes(w))) {
+        return {
+          action: "SKIP",
+          selectedKey: null,
+          isCorrect: false,
+          feedbackSpeech: "Oke, kita lanjut ke soal berikutnya!",
+        };
+      }
+
+      // 2. Cek jawaban huruf langsung (A, B, C, D)
+      //    Cari huruf opsi di awal/akhir ucapan atau sebagai kata tunggal
+      const letterMatch = lower.match(/\b([abcd])\b/i);
+      if (letterMatch) {
+        const key = letterMatch[1].toUpperCase() as "A" | "B" | "C" | "D";
+        // Pastikan opsi ini valid
+        const optionExists = question.options.some((o) => o.key === key);
+        if (optionExists) {
+          const isCorrect = key === question.correctKey;
+          const correctOpt = question.options.find(
+            (o) => o.key === question.correctKey,
+          );
+          const feedbackSpeech = isCorrect
+            ? getRandomItem(CORRECT_FEEDBACKS)
+            : getRandomItem(WRONG_FEEDBACKS)(
+              question.correctKey,
+              correctOpt?.text || "",
+            );
+          return { action: "ANSWER", selectedKey: key, isCorrect, feedbackSpeech };
+        }
+      }
+
+      // 3. Cek apakah ucapan cocok dengan teks opsi jawaban
+      for (const opt of question.options) {
+        const optLower = opt.text.toLowerCase();
+        // Cocokkan jika ucapan mengandung teks opsi atau sebaliknya
+        if (
+          lower.includes(optLower) ||
+          optLower.includes(lower) ||
+          // Fuzzy: minimal 60% kata cocok
+          (lower.split(/\s+/).filter((w) => optLower.includes(w)).length /
+            Math.max(lower.split(/\s+/).length, 1) >=
+            0.6 &&
+            lower.length > 2)
+        ) {
+          const isCorrect = opt.key === question.correctKey;
+          const correctOpt = question.options.find(
+            (o) => o.key === question.correctKey,
+          );
+          const feedbackSpeech = isCorrect
+            ? getRandomItem(CORRECT_FEEDBACKS)
+            : getRandomItem(WRONG_FEEDBACKS)(
+              question.correctKey,
+              correctOpt?.text || "",
+            );
+          return {
+            action: "ANSWER",
+            selectedKey: opt.key,
+            isCorrect,
+            feedbackSpeech,
+          };
+        }
+      }
+
+      // Tidak bisa dicocokkan secara lokal
+      return null;
+    },
+    [],
+  );
+
+  // 3. Kirim Transkrip Suara ke /api/judge (dengan fast-path lokal)
   const sendSpeechToJudge = useCallback(
     async (spokenText: string) => {
       const activeQ = currentQuestionRef.current;
       if (isTransitioningRef.current || !activeQ || isEvaluating) return;
 
+      console.log("📤 Menerima ucapan:", spokenText);
+
+      // ⚡ FAST PATH: Coba cocokkan secara lokal dulu (instan, 0ms)
+      const localResult = tryLocalMatch(spokenText, activeQ);
+
+      if (localResult) {
+        console.log("⚡ Fast-path lokal:", localResult);
+
+        // Aksi EXIT (keluar dari quiz)
+        if (localResult.action === "EXIT") {
+          isTransitioningRef.current = true;
+          setIsTimerRunning(false);
+          stopMic();
+          window.speechSynthesis.cancel();
+          speakText(localResult.feedbackSpeech, () => {
+            router.push("/");
+          });
+          return;
+        }
+
+        // Aksi SKIP (lokal)
+        if (localResult.action === "SKIP") {
+          isTransitioningRef.current = true;
+          setAiFeedback(localResult.feedbackSpeech);
+          speakText(localResult.feedbackSpeech, () => {
+            goToNextQuestion();
+          });
+          return;
+        }
+
+        // Aksi ANSWER (lokal)
+        if (localResult.action === "ANSWER" && localResult.selectedKey) {
+          isTransitioningRef.current = true;
+          const key = localResult.selectedKey;
+          setSelectedAnswer(key);
+          setIsAnswerCorrect(localResult.isCorrect);
+          setAiFeedback(localResult.feedbackSpeech);
+
+          if (localResult.isCorrect) {
+            setTotalScore((prev) => prev + activeQ.points);
+          }
+
+          speakText(localResult.feedbackSpeech, () => {
+            setTimeout(goToNextQuestion, 800);
+          });
+          return;
+        }
+      }
+
+      // 🐢 SLOW PATH: Ucapan ambigu → kirim ke AI judge
       setIsEvaluating(true);
-      console.log("📤 Mengirim ke /api/judge:", spokenText);
+      console.log("🤖 Ucapan ambigu, mengirim ke /api/judge:", spokenText);
 
       try {
         const res = await fetch("/api/judge", {
@@ -226,10 +452,16 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         setIsEvaluating(false);
       }
     },
-    [isEvaluating, speakText, goToNextQuestion],
+    [isEvaluating, speakText, goToNextQuestion, tryLocalMatch],
   );
 
-  // 4. Inisialisasi Speech Recognition
+  // Ref stabil untuk sendSpeechToJudge agar closure recognition tidak stale
+  const sendSpeechToJudgeRef = useRef(sendSpeechToJudge);
+  useEffect(() => {
+    sendSpeechToJudgeRef.current = sendSpeechToJudge;
+  }, [sendSpeechToJudge]);
+
+  // 4. Inisialisasi Speech Recognition (SEKALI saja, stabil via refs)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -259,11 +491,12 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     };
 
     recognition.onresult = (event: any) => {
+      // Gunakan refs agar selalu baca state terbaru
       if (
         isTransitioningRef.current ||
-        !gameStarted ||
-        isEvaluating ||
-        isAiSpeaking
+        !gameStartedRef.current ||
+        isEvaluatingRef.current ||
+        isAiSpeakingRef.current
       )
         return;
 
@@ -278,45 +511,47 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       console.log("🗣️ Suara tertangkap:", cleanText);
       setTranscript(cleanText);
 
-      // Debounce jeda hening 700ms lalu kirim ke AI
+      // Debounce jeda hening 400ms lalu kirim (dipercepat karena ada fast-path lokal)
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
 
       silenceTimerRef.current = setTimeout(() => {
-        sendSpeechToJudge(cleanText);
-      }, 700);
+        sendSpeechToJudgeRef.current(cleanText);
+      }, 400);
     };
 
     recognition.onend = () => {
-      // Re-trigger bila kuis masih berjalan dan mic dalam kondisi aktif
-      if (isMicEnabled && gameStarted && !isFinished && !isAiSpeaking) {
+      // Re-trigger bila kuis masih berjalan dan mic aktif DAN AI tidak sedang bicara
+      if (
+        isMicEnabledRef.current &&
+        gameStartedRef.current &&
+        !isFinishedRef.current &&
+        !isAiSpeakingRef.current
+      ) {
         try {
           recognition.start();
-        } catch {}
+        } catch { }
       }
     };
 
     recognitionRef.current = recognition;
 
-    if (gameStarted && isMicEnabled && !isFinished && !isAiSpeaking) {
-      try {
-        recognition.start();
-      } catch {}
-    }
-
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (recognitionRef.current) {
         recognitionRef.current.abort();
+        recognitionRef.current = null;
       }
     };
-  }, [
-    gameStarted,
-    isFinished,
-    isMicEnabled,
-    isAiSpeaking,
-    isEvaluating,
-    sendSpeechToJudge,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Hanya sekali init, state diakses via refs
+
+  // 4b. Start mic saat game dimulai
+  useEffect(() => {
+    if (gameStarted && isMicEnabled && !isFinished && !isAiSpeaking) {
+      startMic();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStarted]);
 
   // 5. Cek Cache Username LocalStorage
   useEffect(() => {
@@ -372,20 +607,41 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     }
   }, [countdown]);
 
+  // Ref stabil untuk speakText agar effect pembacaan soal tidak terganggu
+  const speakTextRef = useRef(speakText);
+  useEffect(() => {
+    speakTextRef.current = speakText;
+  }, [speakText]);
+
   // 7. Bacakan Pertanyaan saat Nomor Berubah & Game Aktif
   useEffect(() => {
     if (!gameStarted || isFinished || !currentQuestion) return;
 
-    console.log("Trigger pembacaan soal nomor:", currentIndex + 1);
-    speakText(currentQuestion.question);
-  }, [currentIndex, gameStarted, isFinished, speakText]);
+    // ⏸️ Timer pasti mati dulu saat soal baru muncul
+    setIsTimerRunning(false);
 
-  // 8. Timer Mundur Durasi Soal
+    console.log("🔊 Trigger pembacaan soal nomor:", currentIndex + 1, "- Soal:", currentQuestion.question);
+    // Matikan mic dulu sebelum AI bicara
+    stopMic();
+    // Gunakan ref agar tidak tergantung pada recreate speakText
+    speakTextRef.current(currentQuestion.question, () => {
+      // ▶️ AI selesai baca soal → timer MULAI berjalan
+      console.log("⏱️ AI selesai baca soal, timer dimulai!");
+      setIsTimerRunning(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, gameStarted, isFinished]);
+
+  // 8. Timer Mundur Durasi Soal (HANYA jalan kalau isTimerRunning === true)
   useEffect(() => {
     if (!gameStarted || isFinished || isTransitioningRef.current) return;
 
+    // ⏸️ Timer belum boleh jalan sampai AI selesai baca soal
+    if (!isTimerRunning) return;
+
     if (timeLeft <= 0) {
       isTransitioningRef.current = true;
+      setIsTimerRunning(false);
       setAiFeedback("Waktu habis!");
       speakText("Waktu habis! Kita lanjut ke soal berikutnya.", () => {
         goToNextQuestion();
@@ -398,7 +654,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, gameStarted, isFinished, goToNextQuestion, speakText]);
+  }, [timeLeft, gameStarted, isFinished, isTimerRunning, goToNextQuestion, speakText]);
 
   // Toggle Mic Button
   const toggleMic = () => {
@@ -410,7 +666,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     } else {
       try {
         recognitionRef.current.start();
-      } catch {}
+      } catch { }
       setIsMicEnabled(true);
     }
   };
@@ -631,11 +887,10 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         </div>
 
         <div
-          className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-bold transition-colors ${
-            timeLeft <= 5
+          className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-bold transition-colors ${timeLeft <= 5
               ? "bg-red-100 text-red-600 animate-pulse"
               : "bg-zinc-100 text-zinc-800"
-          }`}
+            }`}
         >
           <span>⏱</span>
           <span>{timeLeft}s</span>
@@ -664,13 +919,12 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           {/* AI Voice State Indicator */}
           <div className="flex items-center gap-2 mb-3">
             <span
-              className={`w-2 h-2 rounded-full ${
-                isAiSpeaking
+              className={`w-2 h-2 rounded-full ${isAiSpeaking
                   ? "bg-indigo-500 animate-ping"
                   : isEvaluating
                     ? "bg-amber-500 animate-pulse"
                     : "bg-emerald-500"
-              }`}
+                }`}
             />
             <span className="text-[11px] font-bold tracking-wider uppercase text-zinc-400 font-monaSans">
               {isAiSpeaking
@@ -715,11 +969,10 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                   className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer font-monaSans select-none ${cardStyle}`}
                 >
                   <span
-                    className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center text-xs font-bold ${
-                      isSelected || (selectedAnswer && isCorrectTarget)
+                    className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center text-xs font-bold ${isSelected || (selectedAnswer && isCorrectTarget)
                         ? "bg-white/20 text-white"
                         : "bg-white border border-black/10 text-zinc-700 shadow-sm"
-                    }`}
+                      }`}
                   >
                     {opt.key}
                   </span>
@@ -738,11 +991,10 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className={`mt-5 px-4 py-2.5 rounded-xl text-xs font-bold font-monaSans flex items-center gap-2 ${
-                  isAnswerCorrect
+                className={`mt-5 px-4 py-2.5 rounded-xl text-xs font-bold font-monaSans flex items-center gap-2 ${isAnswerCorrect
                     ? "bg-green-100 text-green-800 border border-green-200"
                     : "bg-amber-100 text-amber-900 border border-amber-200"
-                }`}
+                  }`}
               >
                 <span>{isAnswerCorrect ? "🎉" : "💡"}</span>
                 <span>{aiFeedback}</span>
@@ -758,11 +1010,10 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           type="button"
           onClick={toggleMic}
           disabled={!gameStarted}
-          className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all cursor-pointer shadow-md active:scale-95 ${
-            isMicEnabled
+          className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all cursor-pointer shadow-md active:scale-95 ${isMicEnabled
               ? "bg-[#1c1c1e] text-white hover:bg-black shadow-black/20"
               : "bg-red-500 text-white hover:bg-red-600 shadow-red-500/20"
-          }`}
+            }`}
           title={isMicEnabled ? "Matikan Mikrofon" : "Aktifkan Mikrofon"}
         >
           {isMicEnabled && !isAiSpeaking && (

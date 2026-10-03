@@ -30,12 +30,14 @@ export default function BrushPreloader({ onComplete }: BrushPreloaderProps) {
           if (onComplete) onComplete();
         }}
         className="relative w-[340px] sm:w-[460px] h-[240px] sm:h-[300px] flex items-center justify-center"
+        style={{ willChange: "transform", transform: "translateZ(0)" }}
       >
         <svg
           viewBox="0 0 500 300"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full drop-shadow-[0_10px_25px_rgba(0,0,0,0.18)]"
+          className="w-full h-full"
+          style={{ filter: "drop-shadow(0 10px 25px rgba(0,0,0,0.18))" }}
         >
           {/* Garis Coretan Gelombang Kuas Hitam */}
           <motion.path
