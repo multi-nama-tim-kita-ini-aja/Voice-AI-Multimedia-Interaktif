@@ -449,7 +449,7 @@ export default function Leaderboard() {
                 <SmileDoodle className="hidden md:block w-14 h-10 text-yellow-400 absolute top-260 right-40 rotate-12 pointer-events-none z-10" />
                 <PaperPlaneDoodle className="hidden md:block w-16 h-12 text-amber-600 absolute top-120 right-55 rotate-130 pointer-events-none z-10" />
                 <DoubleCloudDoodle className="hidden md:block w-24 h-12 text-emerald-500 absolute top-150 right-280 -rotate-25 pointer-events-none z-10" />
-                <SpiralDoodle className="hidden md:block w-16 h-16 text-emerald-400 absolute bottom-34 right-72 rotate-92 pointer-events-none z-10" />
+                <SpiralDoodle className="hidden md:block w-16 h-16 text-emerald-400 absolute bottom-34 right-73 rotate-92 pointer-events-none z-10" />
                 <BowTieDoodle className="absolute bottom-3 left-70 md:bottom-28 md:left-12 w-14 h-10 md:w-20 md:h-14 text-amber-400 -rotate-9 pointer-events-none z-10" />
                 <ZigzagDoodle className="hidden md:block w-20 h-8 text-teal-400 absolute top-220 left-40 rotate-6 pointer-events-none z-10" />
                 <RocketDoodle className="hidden md:block w-20 h-30 text-sky-300 absolute top-25 left-35 -rotate-38 pointer-events-none z-10" />
