@@ -65,8 +65,25 @@ export default function CategorySection() {
               </div>
             </div>
 
-            <h2 className="text-[#252525] font-monaSans text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center leading-tight">
-              CHOOSE WHAT YOU KNOW
+            <h2 className="text-white font-monaSans text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center leading-tight [text-shadow:_3px_3px_0_rgba(30,41,59,0.6)]">
+              CHOOSE WHAT YOU{" "}
+              <span className="relative inline-block text-[#FACC15] [text-shadow:_3px_3px_0_rgba(30,41,59,0.6)]">
+                KNOW
+                <svg
+                  className="absolute -bottom-2.5 left-0 w-full h-3 md:h-4 text-[#FACC15] overflow-visible pointer-events-none"
+                  viewBox="0 0 100 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M2 8 C 25 1, 50 15, 75 5 C 88 0, 95 7, 98 9"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
             </h2>
           </div>
         </div>

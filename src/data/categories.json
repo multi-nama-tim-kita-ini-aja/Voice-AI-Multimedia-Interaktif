@@ -2,7 +2,7 @@
   {
     "id": "mtk",
     "title": "Mathematics",
-    "image": "/bukit-hero.png",
+    "image": "/cardMathematics.png",
     "categoryTag": "Algebra",
     
     "categoryTag2": "Logic",
@@ -34,7 +34,7 @@
   {
     "id": "ipa",
     "title": "Science",
-    "image": "/bukit-hero.png",
+    "image": "/cardScience.png",
     "categoryTag": "Physics",
     "categoryTag2": "Lab Equipment",
     "categoryTag3": "Space",
@@ -65,7 +65,7 @@
   {
     "id": "ips",
     "title": "Social Studies",
-    "image": "/bukit-hero.png",
+    "image": "/cardSocial.png",
     "categoryTag": "History",
     "categoryTag2": "Geo",
     "categoryTag3": "Politics",
