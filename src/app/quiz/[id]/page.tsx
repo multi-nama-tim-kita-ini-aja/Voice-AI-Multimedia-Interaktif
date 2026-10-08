@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QUIZ_QUESTIONS, MultipleChoiceQuestion } from "@/data/quizQuestions";
 import { supabase } from "@/lib/supabase";
 import { HaloSearchInput } from "@/components/ui/halo-search";
+import Image from "next/image";
 
 interface QuizPageProps {
   params: Promise<{ id: string }>;
@@ -703,7 +704,21 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#f8fafc] text-zinc-900 flex flex-col justify-between p-4 sm:p-8 select-none overflow-hidden">
+    // Background & Paper Texture
+    <div className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat text-zinc-900 flex flex-col justify-between p-4 sm:p-8 [@media(max-height:650px)]:p-3 select-none overflow-x-hidden"
+      style={{ backgroundImage: "url('/quiz-bg.png')" }}
+      >
+         {/* PAPER */}
+      <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
+        <Image
+          src="/paper.png"
+          alt=""
+          width={1260}
+          height={1782}
+          className="h-[1390px] w-[1200px] object-fill rotate-[-20deg] drop-shadow-[0_20px_18px_rgba(57,45,25,0.24)] max-md:rotate-0"
+        />
+      </div>
+
       {/* 1. MODAL INPUT USERNAME (ALIAS) */}
       <AnimatePresence>
         {showNameModal && (
@@ -869,47 +884,49 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       </AnimatePresence>
 
       {/* 4. HEADER TOP BAR */}
-      <header className="w-full max-w-3xl mx-auto flex items-center justify-between pb-4 border-b border-black/[0.08]">
+      <header className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center pb-3 [@media(max-height:650px)]:pb-1">
         <button
           onClick={() => router.push("/")}
-          className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 transition-colors flex items-center gap-1 cursor-pointer"
+          className="group inline-flex justify-self-start items-center gap-2 rounded-full border border-rose-900/10 bg-[#fff8ed]/90 py-2 pl-2 pr-4 text-xs font-bold text-rose-950 shadow-[0_4px_0_rgba(119,77,49,0.14),0_8px_16px_rgba(86,60,36,0.1)] transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_5px_0_rgba(119,77,49,0.14),0_11px_18px_rgba(86,60,36,0.13)] active:translate-y-0.5 active:shadow-sm cursor-pointer"
         >
-          ✕ Keluar
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-rose-200/80 text-sm text-rose-900 transition-transform group-hover:-rotate-12">
+            ←
+          </span>
+          Keluar
         </button>
 
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-black/[0.05] text-xs font-bold font-monaSans uppercase tracking-wider">
-            {categoryId} • Lvl {level}
+        <div className="flex items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/85 px-4 py-2 shadow-[0_4px_12px_rgba(86,60,36,0.1)]">
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.16)]" />
+          <span className="whitespace-nowrap font-monaSans text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-950 sm:text-xs">
+            Arena Quiz
           </span>
-          <span className="text-xs font-semibold text-zinc-500">
-            {currentIndex + 1} / {questions.length}
-          </span>
+          <span aria-hidden="true" className="text-sm leading-none">✦</span>
         </div>
-
-        <div
-          className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-bold transition-colors ${timeLeft <= 5
-              ? "bg-red-100 text-red-600 animate-pulse"
-              : "bg-zinc-100 text-zinc-800"
-            }`}
+        <button
+          type="button"
+          onClick={() => sendSpeechToJudge("skip")}
+          disabled={isTransitioningRef.current || !gameStarted || isEvaluating}
+          className="group inline-flex justify-self-end items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/75 px-4 py-2 text-[11px] font-bold text-amber-950/65 shadow-[0_3px_0_rgba(119,77,49,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#fff4c8] hover:text-amber-950 hover:shadow-[0_5px_0_rgba(119,77,49,0.16)] active:translate-y-0.5 active:shadow-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <span>⏱</span>
-          <span>{timeLeft}s</span>
-        </div>
+          <span className="hidden sm:inline">Lewati soal</span>
+          <span className="sm:hidden">Skip</span>
+          <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">➜</span>
+        </button>
       </header>
 
       {/* 5. ARENA PERTANYAAN (PILIHAN GANDA) */}
-      <main className="w-full max-w-2xl mx-auto flex-1 flex flex-col justify-center items-center py-6">
+      <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-5 py-3 xl:gap-7 xl:py-10 [@media(max-height:650px)]:gap-2 [@media(max-height:650px)]:py-1">
         <motion.div
           key={currentQuestion?.id}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="w-full bg-white rounded-3xl border border-black/[0.06] p-6 sm:p-8 shadow-[0_12px_36px_rgba(0,0,0,0.06)] flex flex-col items-center relative"
+          className="relative flex w-full max-w-[540px] flex-col items-center overflow-hidden rounded-[2rem] border border-amber-950/10 bg-[#fffdf5]/60 px-5 py-6 shadow-[0_14px_36px_rgba(71,55,29,0.12)] backdrop-blur-[1px] sm:px-10 sm:py-8 xl:max-w-[620px] [@media(max-height:650px)]:py-3"
         >
           {/* Progress Bar Soal */}
-          <div className="absolute top-0 left-0 h-1.5 w-full bg-zinc-100 rounded-t-3xl overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-2 overflow-hidden bg-amber-950/10">
             <div
-              className="h-full bg-amber-400 transition-all duration-300"
+              className="h-full rounded-r-full bg-amber-500 shadow-[0_1px_4px_rgba(180,115,20,0.3)] transition-all duration-300"
               style={{
                 width: `${((currentIndex + 1) / questions.length) * 100}%`,
               }}
@@ -917,7 +934,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           </div>
 
           {/* AI Voice State Indicator */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="mt-2 mb-3 flex items-center gap-2 [@media(max-height:650px)]:mt-1 [@media(max-height:650px)]:mb-2">
             <span
               className={`w-2 h-2 rounded-full ${isAiSpeaking
                   ? "bg-indigo-500 animate-ping"
@@ -936,18 +953,18 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           </div>
 
           {/* Teks Pertanyaan */}
-          <h2 className="text-lg sm:text-2xl font-bold font-monaSans text-zinc-900 leading-snug text-center mb-6">
+          <h2 className="mb-5 max-w-lg text-center font-monaSans text-xl font-extrabold leading-snug text-stone-900 sm:text-2xl [@media(max-height:650px)]:mb-2">
             {currentQuestion?.question}
           </h2>
 
           {/* Grid Opsi Pilihan Ganda */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          <div className="grid w-full grid-cols-1 gap-2.5 [@media(max-height:650px)]:gap-1.5">
             {currentQuestion?.options.map((opt) => {
               const isSelected = selectedAnswer === opt.key;
               const isCorrectTarget = currentQuestion.correctKey === opt.key;
 
               let cardStyle =
-                "bg-zinc-50 border-black/5 hover:border-black/20 text-zinc-800";
+                "border-amber-950/15 bg-[#fffdf8]/75 text-stone-800 shadow-[2px_3px_0_rgba(93,75,44,0.12)] hover:-translate-y-0.5 hover:border-amber-900/30 hover:bg-white hover:shadow-[3px_5px_0_rgba(93,75,44,0.14)]";
 
               if (isSelected) {
                 if (isAnswerCorrect) {
@@ -966,17 +983,17 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                   type="button"
                   onClick={() => sendSpeechToJudge(opt.key)}
                   disabled={isTransitioningRef.current || isEvaluating}
-                  className={`flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer font-monaSans select-none ${cardStyle}`}
+                  className={`flex min-h-[58px] w-full items-center gap-4 rounded-2xl border-2 px-4 py-3 text-left font-monaSans transition-all duration-200 cursor-pointer select-none [@media(max-height:650px)]:min-h-[44px] [@media(max-height:650px)]:py-2 ${cardStyle}`}
                 >
                   <span
-                    className={`w-7 h-7 shrink-0 rounded-xl flex items-center justify-center text-xs font-bold ${isSelected || (selectedAnswer && isCorrectTarget)
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${isSelected || (selectedAnswer && isCorrectTarget)
                         ? "bg-white/20 text-white"
-                        : "bg-white border border-black/10 text-zinc-700 shadow-sm"
+                        : "border border-amber-950/10 bg-amber-100/70 text-amber-950"
                       }`}
                   >
                     {opt.key}
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold">
+                  <span className="text-sm font-semibold leading-snug sm:text-base">
                     {opt.text}
                   </span>
                 </button>
@@ -1002,22 +1019,86 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
             )}
           </AnimatePresence>
         </motion.div>
+
+        <aside
+          aria-label="Ringkasan kuis"
+          className="mx-auto grid w-full max-w-[250px] grid-cols-1 gap-7 lg:absolute lg:right-[-1rem] lg:top-1/2 lg:mx-0 lg:w-56 lg:-translate-y-1/2 [@media(max-height:650px)]:scale-[0.82]"
+        >
+          <article className="relative -rotate-2 bg-[#ffe89a] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(85,65,20,0.3)]">
+            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 rotate-1 bg-white/60 shadow-sm" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-950/55">
+              Timer
+            </p>
+            <div className={`mt-2 font-mono text-4xl font-black tracking-tight ${timeLeft <= 5 ? "text-red-600" : "text-amber-950"}`}>
+              00:{String(timeLeft).padStart(2, "0")}
+            </div>
+            <p className="mt-1 text-xs font-medium text-amber-950/60">
+              {isTimerRunning ? "Waktu menjawab" : "Bersiap menjawab"}
+            </p>
+            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-950/10">
+              <div
+                className={`h-full rounded-full transition-[width] duration-[1000ms] ease-linear ${timeLeft <= 5 ? "bg-red-500" : "bg-amber-700"}`}
+                style={{ width: `${Math.max(0, (timeLeft / initialTime) * 100)}%` }}
+              />
+            </div>
+          </article>
+
+          <article className="relative rotate-2 bg-[#f8cbd1] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(85,45,50,0.28)]">
+            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 -rotate-2 bg-white/60 shadow-sm" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-950/55">
+              Total skor
+            </p>
+            <div className="mt-2 font-monaSans text-4xl font-black tracking-tight text-rose-950">
+              {totalScore}
+            </div>
+            <p className="mt-1 text-xs font-medium text-rose-950/60">
+              poin terkumpul
+            </p>
+            <div aria-hidden="true" className="absolute bottom-4 right-5 text-2xl text-rose-950/25">
+              +
+            </div>
+          </article>
+
+          <article className="relative -rotate-1 bg-[#cce8d2] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(35,75,45,0.28)]">
+            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 rotate-2 bg-white/60 shadow-sm" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-950/55">
+              Soal &amp; level
+            </p>
+            <div className="mt-2 font-monaSans text-3xl font-black tracking-tight text-emerald-950">
+              {currentIndex + 1}
+              <span className="ml-1 text-base font-semibold text-emerald-950/45">
+                / {questions.length}
+              </span>
+            </div>
+            <p className="mt-1 text-xs font-semibold text-emerald-950/65">
+              {categoryId} <span className="px-1">·</span> Level {level}
+            </p>
+            <div className="mt-4 flex gap-1">
+              {questions.map((question, index) => (
+                <span
+                  key={question.id}
+                  className={`h-1.5 flex-1 rounded-full ${index <= currentIndex ? "bg-emerald-800/70" : "bg-emerald-950/10"}`}
+                />
+              ))}
+            </div>
+          </article>
+        </aside>
       </main>
 
       {/* 6. FOOTER VOICE CONTROLS */}
-      <footer className="w-full max-w-md mx-auto flex flex-col items-center gap-3">
+      <footer className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-2 pb-1 [@media(max-height:650px)]:gap-1">
         <button
           type="button"
           onClick={toggleMic}
           disabled={!gameStarted}
-          className={`relative flex items-center justify-center w-14 h-14 rounded-full transition-all cursor-pointer shadow-md active:scale-95 ${isMicEnabled
-              ? "bg-[#1c1c1e] text-white hover:bg-black shadow-black/20"
-              : "bg-red-500 text-white hover:bg-red-600 shadow-red-500/20"
+          className={`relative flex h-14 w-14 items-center justify-center rounded-full border-[4px] border-[#fff8e9] transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 [@media(max-height:650px)]:h-11 [@media(max-height:650px)]:w-11 ${isMicEnabled
+              ? "bg-emerald-700 text-white shadow-[0_5px_0_#854d0e,0_10px_20px_rgba(76,54,27,0.24)] hover:-translate-y-0.5 hover:bg-emerald-600"
+              : "bg-rose-500 text-white shadow-[0_5px_0_#9f3542,0_10px_20px_rgba(76,54,27,0.2)] hover:-translate-y-0.5 hover:bg-rose-600"
             }`}
           title={isMicEnabled ? "Matikan Mikrofon" : "Aktifkan Mikrofon"}
         >
           {isMicEnabled && !isAiSpeaking && (
-            <span className="animate-ping absolute inset-0 rounded-full bg-emerald-400 opacity-30" />
+            <span className="animate-ping absolute inset-0 rounded-full bg-emerald-300 opacity-25" />
           )}
 
           {isMicEnabled ? (
@@ -1039,31 +1120,22 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         </button>
 
         {/* Subtitle Transkrip Suara Pemain */}
-        <div className="flex flex-col items-center text-center">
-          <span className="text-[11px] font-semibold text-zinc-500 font-monaSans">
+        <div className="flex min-h-9 max-w-full items-center justify-center rounded-full border border-amber-950/10 bg-[#fff9e9]/85 px-4 py-2 text-center shadow-[0_3px_8px_rgba(86,60,36,0.1)] [@media(max-height:650px)]:min-h-7 [@media(max-height:650px)]:px-3 [@media(max-height:650px)]:py-1">
+          <span className="text-[11px] font-semibold leading-snug text-amber-950/75 font-monaSans sm:text-xs">
             {transcript ? (
-              <span className="text-zinc-800 italic">
+              <span className="text-amber-950 italic">
                 &ldquo;{transcript}&rdquo;
               </span>
             ) : isAiSpeaking ? (
-              "🔊 AI sedang membacakan soal..."
+              "🔊 Dengerin dulu, soalnya lagi dibacain!"
             ) : isMicEnabled ? (
-              '🎤 Bicara pilihan (A/B/C/D) atau ucapkan "Lanjut"'
+              '🎤 Sebut pilihan A, B, C, D atau bilang "Lanjut"'
             ) : (
-              "🔇 Mic dinonaktifkan (klik mic untuk menyalakan)"
+              "🔇 Mic istirahat — pencet tombol untuk aktifkan"
             )}
           </span>
         </div>
 
-        {/* Tombol Skip Cadangan */}
-        <button
-          type="button"
-          onClick={() => sendSpeechToJudge("skip")}
-          disabled={isTransitioningRef.current || !gameStarted || isEvaluating}
-          className="text-xs font-semibold text-zinc-400 hover:text-zinc-700 py-1 px-3 transition-colors cursor-pointer disabled:opacity-30"
-        >
-          Lewati Soal (Next) ➔
-        </button>
       </footer>
     </div>
   );
