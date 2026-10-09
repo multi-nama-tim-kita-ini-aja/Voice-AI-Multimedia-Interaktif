@@ -178,7 +178,12 @@ export default function HowToPlay() {
               height={16}
               className="absolute -top-0 right-2 mix-blend-multiply z-10"
             />
-            <CustomWaveButton size="sm">
+            <CustomWaveButton
+              size="sm"
+              onClick={() =>
+                document.getElementById("categories")?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
               Start Quiz
             </CustomWaveButton>
           </div>

@@ -1,12 +1,32 @@
 "use client";
 
-import { useEffect, useState, useRef, use, useCallback } from "react";
+import { useEffect, useState, useRef, use, useCallback, type CSSProperties } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { QUIZ_QUESTIONS, MultipleChoiceQuestion } from "@/data/quizQuestions";
 import { supabase } from "@/lib/supabase";
 import { HaloSearchInput } from "@/components/ui/halo-search";
 import Image from "next/image";
+
+type StickyNoteLayoutStyle = CSSProperties & {
+  "--note-x": string;
+  "--note-y": string;
+  "--note-width": string;
+};
+
+// Adjust each note's desktop x/y position and width here.
+const STICKY_NOTE_LAYOUT = {
+  timer: {
+    x: "clamp(0.75rem, 2cqw, 2rem)",
+    y: "50%",
+    width: "clamp(190px, min(22cqw, 38svh), 280px)",
+  },
+  summary: {
+    x: "clamp(0.75rem, 2cqw, 2rem)",
+    y: "50%",
+    width: "clamp(190px, min(22cqw, 38svh), 280px)",
+  },
+} as const;
 
 interface QuizPageProps {
   params: Promise<{ id: string }>;
@@ -705,7 +725,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
 
   return (
     // Background & Paper Texture
-    <div className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat text-zinc-900 flex flex-col justify-between p-4 sm:p-8 [@media(max-height:650px)]:p-3 select-none overflow-x-hidden"
+    <div className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat text-zinc-900 flex flex-col justify-between p-4 sm:p-8 [@media(max-height:650px)]:p-3 select-none overflow-x-hidden lg:h-dvh lg:min-h-0 lg:overflow-hidden"
       style={{ backgroundImage: "url('/quiz-bg.png')" }}
     >
       {/* PAPER */}
@@ -915,13 +935,13 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       </header>
 
       {/* 5. ARENA PERTANYAAN (PILIHAN GANDA) */}
-      <main className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-5 py-3 xl:gap-7 xl:py-10 [@media(max-height:650px)]:gap-2 [@media(max-height:650px)]:py-1">
+      <main className="@container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-5 py-3 xl:gap-7 xl:py-10 [@media(max-height:650px)]:gap-2 [@media(max-height:650px)]:py-1 lg:min-h-0 lg:justify-start lg:pt-[clamp(0.75rem,4vh,2rem)] lg:pb-3 xl:pt-[clamp(0.75rem,4vh,2rem)] xl:pb-3">
         <motion.div
           key={currentQuestion?.id}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="relative flex w-full max-w-[540px] flex-col items-center overflow-hidden rounded-[2rem] border border-amber-950/10 bg-[#fffdf5]/60 px-5 py-6 shadow-[0_14px_36px_rgba(71,55,29,0.12)] backdrop-blur-[1px] sm:px-10 sm:py-8 xl:max-w-[620px] [@media(max-height:650px)]:py-3"
+          className="relative flex w-full max-w-[540px] shrink-0 flex-col items-center overflow-hidden rounded-[2rem] border border-amber-950/10 bg-[#fffdf5]/60 px-5 py-6 shadow-[0_14px_36px_rgba(71,55,29,0.12)] backdrop-blur-[1px] sm:px-10 sm:py-8 xl:max-w-[620px] [@media(max-height:650px)]:py-3"
         >
           {/* Progress Bar Soal */}
           <div className="absolute inset-x-0 top-0 h-2 overflow-hidden bg-amber-950/10">
@@ -1001,20 +1021,19 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
             })}
           </div>
 
-          {/* Feedback AI Banner */}
           <AnimatePresence>
             {aiFeedback && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className={`mt-5 px-4 py-2.5 rounded-xl text-xs font-bold font-monaSans flex items-center gap-2 ${isAnswerCorrect
+                className={`mt-5 flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold font-monaSans [@media(max-height:650px)]:mt-2 ${isAnswerCorrect
                   ? "bg-green-100 text-green-800 border border-green-200"
                   : "bg-amber-100 text-amber-900 border border-amber-200"
                   }`}
               >
-                <span>{isAnswerCorrect ? "🎉" : "💡"}</span>
-                <span>{aiFeedback}</span>
+                <span className="shrink-0">{isAnswerCorrect ? "🎉" : "💡"}</span>
+                <span className="min-w-0 whitespace-normal break-words">{aiFeedback}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -1022,7 +1041,12 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         {/* LEFT SIDE ASIDE: Sticky Note Timer */}
         <aside
           aria-label="Timer kuis"
-          className="mx-auto w-full max-w-[340px] sm:max-w-[380px] lg:absolute lg:left-3 xl:left-8 2xl:left-14 lg:top-1/2 lg:mx-0 lg:w-[320px] xl:w-[360px] 2xl:w-[400px] lg:-translate-y-1/2 z-20 [@media(max-height:650px)]:scale-[0.82]"
+          style={{
+            "--note-x": STICKY_NOTE_LAYOUT.timer.x,
+            "--note-y": STICKY_NOTE_LAYOUT.timer.y,
+            "--note-width": STICKY_NOTE_LAYOUT.timer.width,
+          } as StickyNoteLayoutStyle}
+          className="mx-auto w-full max-w-[340px] sm:max-w-[380px] lg:absolute lg:left-[var(--note-x)] lg:top-[var(--note-y)] lg:mx-0 lg:w-[var(--note-width)] lg:-translate-y-1/2 z-20"
         >
           <div className="@container relative w-full -rotate-[5deg] drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-transform duration-300 hover:scale-105 hover:-rotate-[3deg] select-none">
             <Image
@@ -1057,7 +1081,12 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         {/* RIGHT SIDE ASIDE: Skor & Soal-Level */}
         <aside
           aria-label="Ringkasan kuis"
-          className="mx-auto grid w-full max-w-[310px] sm:max-w-[340px] grid-cols-1 gap-5 xl:gap-7 lg:absolute lg:right-3 xl:right-8 2xl:right-14 lg:top-1/2 lg:mx-0 lg:w-[290px] xl:w-[330px] 2xl:w-[360px] lg:-translate-y-1/2 z-20 [@media(max-height:650px)]:scale-[0.82]"
+          style={{
+            "--note-x": STICKY_NOTE_LAYOUT.summary.x,
+            "--note-y": STICKY_NOTE_LAYOUT.summary.y,
+            "--note-width": STICKY_NOTE_LAYOUT.summary.width,
+          } as StickyNoteLayoutStyle}
+          className="mx-auto grid w-full max-w-[310px] sm:max-w-[340px] grid-cols-1 gap-5 xl:gap-7 lg:absolute lg:right-[var(--note-x)] lg:top-[var(--note-y)] lg:mx-0 lg:w-[var(--note-width)] lg:-translate-y-1/2 z-20"
         >
           {/* Sticky Note Skor */}
           <div className="@container relative w-full rotate-[4deg] drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-transform duration-300 hover:scale-105 hover:rotate-[2deg] select-none">
