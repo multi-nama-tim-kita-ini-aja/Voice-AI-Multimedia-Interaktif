@@ -78,6 +78,9 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
   const recognitionRef = useRef<any>(null);
   const isTransitioningRef = useRef(false);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const micResumeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isSpeechCapturePausedRef = useRef(false);
+  const speechGenerationRef = useRef(0);
   const currentQuestionRef = useRef<MultipleChoiceQuestion | null>(null);
 
   // Refs untuk akses state terbaru tanpa re-create recognition
@@ -132,7 +135,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       recognitionRef.current &&
       isMicEnabledRef.current &&
       !isTransitioningRef.current &&
-      !isFinishedRef.current
+      !isFinishedRef.current &&
+      !isSpeechCapturePausedRef.current
     ) {
       try {
         recognitionRef.current.start();
@@ -147,6 +151,27 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         if (onEnd) onEnd();
         return;
       }
+
+      const speechGeneration = ++speechGenerationRef.current;
+      isSpeechCapturePausedRef.current = true;
+      setTranscript("");
+      if (micResumeTimerRef.current) {
+        clearTimeout(micResumeTimerRef.current);
+        micResumeTimerRef.current = null;
+      }
+      stopMic();
+
+      const resumeMicAfterSpeech = () => {
+        if (micResumeTimerRef.current) {
+          clearTimeout(micResumeTimerRef.current);
+        }
+        micResumeTimerRef.current = setTimeout(() => {
+          if (speechGenerationRef.current !== speechGeneration) return;
+          isSpeechCapturePausedRef.current = false;
+          micResumeTimerRef.current = null;
+          startMic();
+        }, 300);
+      };
 
       // Bersihkan antrean suara lama
       window.speechSynthesis.cancel();
@@ -171,38 +196,37 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
       }
 
       utterance.onstart = () => {
+        if (speechGenerationRef.current !== speechGeneration) return;
         console.log("🔊 [AI SPEAKING] Mic dimatikan otomatis");
+        isAiSpeakingRef.current = true;
         setIsAiSpeaking(true);
         // MATIKAN mic saat AI mulai bicara agar tidak menangkap suara AI
         stopMic();
       };
 
       utterance.onend = () => {
+        if (speechGenerationRef.current !== speechGeneration) return;
         console.log("🔇 [AI SELESAI] Mic dinyalakan kembali");
+        isAiSpeakingRef.current = false;
         setIsAiSpeaking(false);
-        // Beri jeda 300ms setelah AI selesai baru nyalakan mic
-        // agar sisa echo AI tidak tertangkap
-        setTimeout(() => {
-          startMic();
-        }, 300);
+        // Beri jeda agar sisa echo AI tidak tertangkap.
+        resumeMicAfterSpeech();
         if (onEnd) onEnd();
       };
 
       utterance.onerror = (e: any) => {
+        if (speechGenerationRef.current !== speechGeneration) return;
         // Abaikan jika error hanya karena 'canceled' atau 'interrupted'
         if (e.error === "canceled" || e.error === "interrupted") {
+          isAiSpeakingRef.current = false;
           setIsAiSpeaking(false);
-          // Tetap coba nyalakan mic meski ada cancel
-          setTimeout(() => {
-            startMic();
-          }, 300);
+          resumeMicAfterSpeech();
           return;
         }
         console.warn("SpeechSynthesis warning:", e.error || e);
+        isAiSpeakingRef.current = false;
         setIsAiSpeaking(false);
-        setTimeout(() => {
-          startMic();
-        }, 300);
+        resumeMicAfterSpeech();
         if (onEnd) onEnd();
       };
 
@@ -518,7 +542,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         isTransitioningRef.current ||
         !gameStartedRef.current ||
         isEvaluatingRef.current ||
-        isAiSpeakingRef.current
+        isAiSpeakingRef.current ||
+        isSpeechCapturePausedRef.current
       )
         return;
 
@@ -547,7 +572,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
         isMicEnabledRef.current &&
         gameStartedRef.current &&
         !isFinishedRef.current &&
-        !isAiSpeakingRef.current
+        !isAiSpeakingRef.current &&
+        !isSpeechCapturePausedRef.current
       ) {
         try {
           recognition.start();
@@ -559,6 +585,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
 
     return () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      if (micResumeTimerRef.current) clearTimeout(micResumeTimerRef.current);
       if (recognitionRef.current) {
         recognitionRef.current.abort();
         recognitionRef.current = null;
@@ -643,9 +670,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     setIsTimerRunning(false);
 
     console.log("🔊 Trigger pembacaan soal nomor:", currentIndex + 1, "- Soal:", currentQuestion.question);
-    // Matikan mic dulu sebelum AI bicara
-    stopMic();
-    // Gunakan ref agar tidak tergantung pada recreate speakText
+    // speakText menjeda recognition sebelum mulai membaca agar tidak menangkap suara AI.
     speakTextRef.current(currentQuestion.question, () => {
       // ▶️ AI selesai baca soal → timer MULAI berjalan
       console.log("⏱️ AI selesai baca soal, timer dimulai!");
@@ -683,13 +708,13 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     if (!recognitionRef.current) return;
 
     if (isMicEnabled) {
+      isMicEnabledRef.current = false;
       recognitionRef.current.abort();
       setIsMicEnabled(false);
     } else {
-      try {
-        recognitionRef.current.start();
-      } catch { }
+      isMicEnabledRef.current = true;
       setIsMicEnabled(true);
+      startMic();
     }
   };
 
