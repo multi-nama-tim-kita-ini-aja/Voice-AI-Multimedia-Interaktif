@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MenuItem {
@@ -18,8 +19,10 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 export default function MenuMac() {
+  const pathname = usePathname();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +44,9 @@ export default function MenuMac() {
       targetElement.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // Sembunyikan MenuMacOS di halaman quiz (setelah semua hooks)
+  if (pathname?.startsWith("/quiz")) return null;
 
   return (
     <AnimatePresence>
