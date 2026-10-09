@@ -707,8 +707,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
     // Background & Paper Texture
     <div className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat text-zinc-900 flex flex-col justify-between p-4 sm:p-8 [@media(max-height:650px)]:p-3 select-none overflow-x-hidden"
       style={{ backgroundImage: "url('/quiz-bg.png')" }}
-      >
-         {/* PAPER */}
+    >
+      {/* PAPER */}
       <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
         <Image
           src="/paper.png"
@@ -937,10 +937,10 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           <div className="mt-2 mb-3 flex items-center gap-2 [@media(max-height:650px)]:mt-1 [@media(max-height:650px)]:mb-2">
             <span
               className={`w-2 h-2 rounded-full ${isAiSpeaking
-                  ? "bg-indigo-500 animate-ping"
-                  : isEvaluating
-                    ? "bg-amber-500 animate-pulse"
-                    : "bg-emerald-500"
+                ? "bg-indigo-500 animate-ping"
+                : isEvaluating
+                  ? "bg-amber-500 animate-pulse"
+                  : "bg-emerald-500"
                 }`}
             />
             <span className="text-[11px] font-bold tracking-wider uppercase text-zinc-400 font-monaSans">
@@ -987,8 +987,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                 >
                   <span
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold ${isSelected || (selectedAnswer && isCorrectTarget)
-                        ? "bg-white/20 text-white"
-                        : "border border-amber-950/10 bg-amber-100/70 text-amber-950"
+                      ? "bg-white/20 text-white"
+                      : "border border-amber-950/10 bg-amber-100/70 text-amber-950"
                       }`}
                   >
                     {opt.key}
@@ -1009,8 +1009,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className={`mt-5 px-4 py-2.5 rounded-xl text-xs font-bold font-monaSans flex items-center gap-2 ${isAnswerCorrect
-                    ? "bg-green-100 text-green-800 border border-green-200"
-                    : "bg-amber-100 text-amber-900 border border-amber-200"
+                  ? "bg-green-100 text-green-800 border border-green-200"
+                  : "bg-amber-100 text-amber-900 border border-amber-200"
                   }`}
               >
                 <span>{isAnswerCorrect ? "🎉" : "💡"}</span>
@@ -1019,69 +1019,100 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
             )}
           </AnimatePresence>
         </motion.div>
+        {/* LEFT SIDE ASIDE: Sticky Note Timer */}
+        <aside
+          aria-label="Timer kuis"
+          className="mx-auto w-full max-w-[340px] sm:max-w-[380px] lg:absolute lg:left-3 xl:left-8 2xl:left-14 lg:top-1/2 lg:mx-0 lg:w-[320px] xl:w-[360px] 2xl:w-[400px] lg:-translate-y-1/2 z-20 [@media(max-height:650px)]:scale-[0.82]"
+        >
+          <div className="@container relative w-full -rotate-[5deg] drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-transform duration-300 hover:scale-105 hover:-rotate-[3deg] select-none">
+            <Image
+              src="/sticky note timer.png"
+              alt="Sticky Note Timer"
+              width={0}
+              height={0}
+              sizes="(min-width:1536px) 400px, (min-width:1280px) 360px, 320px"
+              priority
+              className="h-auto w-full pointer-events-none"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-[12%] pt-[4%] pb-[3%]">
+              <p className="text-[3.6cqw] font-extrabold uppercase tracking-[0.18em] text-amber-950/80 font-monaSans">
+                Timer
+              </p>
+              <div className={`font-mono text-[12cqw] font-black tracking-tight leading-none ${timeLeft <= 5 ? "text-red-600 animate-pulse" : "text-amber-950"}`}>
+                00:{String(timeLeft).padStart(2, "0")}
+              </div>
+              <p className="text-[3.4cqw] font-bold text-amber-950/75 font-inter">
+                {isTimerRunning ? "Waktu menjawab" : "Bersiap menjawab"}
+              </p>
+              <div className="mt-[1.5cqw] h-[1.8cqw] w-2/3 overflow-hidden rounded-full bg-amber-950/15">
+                <div
+                  className={`h-full rounded-full transition-[width] duration-[1000ms] ease-linear ${timeLeft <= 5 ? "bg-red-500" : "bg-amber-700"}`}
+                  style={{ width: `${Math.max(0, (timeLeft / initialTime) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </aside>
 
+        {/* RIGHT SIDE ASIDE: Skor & Soal-Level */}
         <aside
           aria-label="Ringkasan kuis"
-          className="mx-auto grid w-full max-w-[250px] grid-cols-1 gap-7 lg:absolute lg:right-[-1rem] lg:top-1/2 lg:mx-0 lg:w-56 lg:-translate-y-1/2 [@media(max-height:650px)]:scale-[0.82]"
+          className="mx-auto grid w-full max-w-[310px] sm:max-w-[340px] grid-cols-1 gap-5 xl:gap-7 lg:absolute lg:right-3 xl:right-8 2xl:right-14 lg:top-1/2 lg:mx-0 lg:w-[290px] xl:w-[330px] 2xl:w-[360px] lg:-translate-y-1/2 z-20 [@media(max-height:650px)]:scale-[0.82]"
         >
-          <article className="relative -rotate-2 bg-[#ffe89a] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(85,65,20,0.3)]">
-            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 rotate-1 bg-white/60 shadow-sm" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-950/55">
-              Timer
-            </p>
-            <div className={`mt-2 font-mono text-4xl font-black tracking-tight ${timeLeft <= 5 ? "text-red-600" : "text-amber-950"}`}>
-              00:{String(timeLeft).padStart(2, "0")}
+          {/* Sticky Note Skor */}
+          <div className="@container relative w-full rotate-[4deg] drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-transform duration-300 hover:scale-105 hover:rotate-[2deg] select-none">
+            <Image
+              src="/sticky note skor.png"
+              alt="Sticky Note Skor"
+              width={0}
+              height={0}
+              sizes="(min-width:1536px) 360px, (min-width:1280px) 330px, 290px"
+              priority
+              className="h-auto w-full pointer-events-none"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-[12%] pt-[8%] pb-[6%]">
+              <p className="text-[5cqw] font-extrabold uppercase tracking-[0.18em] text-rose-950/80 font-monaSans">
+                Total skor
+              </p>
+              <div className="my-[1cqw] font-monaSans text-[18cqw] font-black tracking-tight leading-none text-rose-950">
+                {totalScore}
+              </div>
+              <p className="text-[4.8cqw] font-bold text-rose-950/75 font-inter">poin terkumpul</p>
             </div>
-            <p className="mt-1 text-xs font-medium text-amber-950/60">
-              {isTimerRunning ? "Waktu menjawab" : "Bersiap menjawab"}
-            </p>
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-950/10">
-              <div
-                className={`h-full rounded-full transition-[width] duration-[1000ms] ease-linear ${timeLeft <= 5 ? "bg-red-500" : "bg-amber-700"}`}
-                style={{ width: `${Math.max(0, (timeLeft / initialTime) * 100)}%` }}
-              />
-            </div>
-          </article>
+          </div>
 
-          <article className="relative rotate-2 bg-[#f8cbd1] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(85,45,50,0.28)]">
-            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 -rotate-2 bg-white/60 shadow-sm" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-rose-950/55">
-              Total skor
-            </p>
-            <div className="mt-2 font-monaSans text-4xl font-black tracking-tight text-rose-950">
-              {totalScore}
+          {/* Sticky Note Soal & Level */}
+          <div className="@container relative w-full -rotate-[3deg] drop-shadow-[0_12px_24px_rgba(0,0,0,0.2)] transition-transform duration-300 hover:scale-105 hover:-rotate-[1deg] select-none">
+            <Image
+              src="/sticky note soal level.png"
+              alt="Sticky Note Soal & Level"
+              width={0}
+              height={0}
+              sizes="(min-width:1536px) 360px, (min-width:1280px) 330px, 290px"
+              priority
+              className="h-auto w-full pointer-events-none"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-[12%] pt-[8%] pb-[6%]">
+              <p className="text-[5cqw] font-extrabold uppercase tracking-[0.18em] text-emerald-950/80 font-monaSans">
+                Soal &amp; level
+              </p>
+              <div className="my-[1cqw] font-monaSans text-[15cqw] font-black tracking-tight leading-none text-emerald-950">
+                {currentIndex + 1}
+                <span className="ml-1 text-[6.5cqw] font-bold text-emerald-950/50">/ {questions.length}</span>
+              </div>
+              <p className="text-[4.4cqw] font-extrabold uppercase text-emerald-950/75 font-inter">
+                {categoryId} <span className="px-1">·</span> Level {level}
+              </p>
+              <div className="mt-[2.2cqw] flex w-3/4 gap-[1.2cqw]">
+                {questions.map((question, index) => (
+                  <span
+                    key={question.id}
+                    className={`h-[2.2cqw] flex-1 rounded-full ${index <= currentIndex ? "bg-emerald-800/80" : "bg-emerald-950/20"}`}
+                  />
+                ))}
+              </div>
             </div>
-            <p className="mt-1 text-xs font-medium text-rose-950/60">
-              poin terkumpul
-            </p>
-            <div aria-hidden="true" className="absolute bottom-4 right-5 text-2xl text-rose-950/25">
-              +
-            </div>
-          </article>
-
-          <article className="relative -rotate-1 bg-[#cce8d2] px-5 pb-5 pt-6 shadow-[4px_14px_24px_rgba(35,75,45,0.28)]">
-            <span aria-hidden="true" className="absolute left-1/2 top-0 h-3 w-16 -translate-x-1/2 -translate-y-1 rotate-2 bg-white/60 shadow-sm" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-950/55">
-              Soal &amp; level
-            </p>
-            <div className="mt-2 font-monaSans text-3xl font-black tracking-tight text-emerald-950">
-              {currentIndex + 1}
-              <span className="ml-1 text-base font-semibold text-emerald-950/45">
-                / {questions.length}
-              </span>
-            </div>
-            <p className="mt-1 text-xs font-semibold text-emerald-950/65">
-              {categoryId} <span className="px-1">·</span> Level {level}
-            </p>
-            <div className="mt-4 flex gap-1">
-              {questions.map((question, index) => (
-                <span
-                  key={question.id}
-                  className={`h-1.5 flex-1 rounded-full ${index <= currentIndex ? "bg-emerald-800/70" : "bg-emerald-950/10"}`}
-                />
-              ))}
-            </div>
-          </article>
+          </div>
         </aside>
       </main>
 
@@ -1092,8 +1123,8 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           onClick={toggleMic}
           disabled={!gameStarted}
           className={`relative flex h-14 w-14 items-center justify-center rounded-full border-[4px] border-[#fff8e9] transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 [@media(max-height:650px)]:h-11 [@media(max-height:650px)]:w-11 ${isMicEnabled
-              ? "bg-emerald-700 text-white shadow-[0_5px_0_#854d0e,0_10px_20px_rgba(76,54,27,0.24)] hover:-translate-y-0.5 hover:bg-emerald-600"
-              : "bg-rose-500 text-white shadow-[0_5px_0_#9f3542,0_10px_20px_rgba(76,54,27,0.2)] hover:-translate-y-0.5 hover:bg-rose-600"
+            ? "bg-emerald-700 text-white shadow-[0_5px_0_#854d0e,0_10px_20px_rgba(76,54,27,0.24)] hover:-translate-y-0.5 hover:bg-emerald-600"
+            : "bg-rose-500 text-white shadow-[0_5px_0_#9f3542,0_10px_20px_rgba(76,54,27,0.2)] hover:-translate-y-0.5 hover:bg-rose-600"
             }`}
           title={isMicEnabled ? "Matikan Mikrofon" : "Aktifkan Mikrofon"}
         >
