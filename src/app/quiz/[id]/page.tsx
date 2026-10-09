@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { QUIZ_QUESTIONS, MultipleChoiceQuestion } from "@/data/quizQuestions";
 import { supabase } from "@/lib/supabase";
 import { HaloSearchInput } from "@/components/ui/halo-search";
+import { AiBlobWarp } from "@/components/ui/ai-blob-warp";
 import Image from "next/image";
 
 type StickyNoteLayoutStyle = CSSProperties & {
@@ -905,6 +906,36 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
 
       {/* 4. HEADER TOP BAR */}
       <header className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center pb-3 [@media(max-height:650px)]:pb-1">
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+          <AnimatePresence>
+            {isAiSpeaking && (
+              <motion.div
+                key="ai-speaking-blob"
+                initial={{ opacity: 0, scale: 0.55, y: -14, rotate: -16 }}
+                animate={{
+                  opacity: 1,
+                  scale: [0.55, 1.12, 0.94, 1],
+                  y: [-14, 3, -2, 0],
+                  rotate: [-16, 8, -4, 0],
+                }}
+                exit={{ opacity: 0, scale: 0.7, y: -8, rotate: 10 }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                  scale: { duration: 0.65, times: [0, 0.45, 0.75, 1] },
+                  y: { duration: 0.65, times: [0, 0.45, 0.75, 1] },
+                  rotate: { duration: 0.65, times: [0, 0.45, 0.75, 1] },
+                }}
+                aria-hidden="true"
+              >
+                <AiBlobWarp
+                  className="size-10 sm:size-11"
+                  warpProps={{ speed: 1.15 }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <button
           onClick={() => router.push("/")}
           className="group inline-flex justify-self-start items-center gap-2 rounded-full border border-rose-900/10 bg-[#fff8ed]/90 py-2 pl-2 pr-4 text-xs font-bold text-rose-950 shadow-[0_4px_0_rgba(119,77,49,0.14),0_8px_16px_rgba(86,60,36,0.1)] transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_5px_0_rgba(119,77,49,0.14),0_11px_18px_rgba(86,60,36,0.13)] active:translate-y-0.5 active:shadow-sm cursor-pointer"
@@ -915,34 +946,32 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
           Keluar
         </button>
 
-        <div className="flex items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/85 px-4 py-2 shadow-[0_4px_12px_rgba(86,60,36,0.1)]">
+        <div aria-hidden="true" className="invisible flex items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/85 px-4 py-2 shadow-[0_4px_12px_rgba(86,60,36,0.1)]">
+          <span className="h-2 w-2 rounded-full" />
+          <span className="whitespace-nowrap font-monaSans text-[10px] font-extrabold uppercase tracking-[0.18em] sm:text-xs">
+            Arena Quiz
+          </span>
+          <span className="text-sm leading-none">✦</span>
+        </div>
+        <div className="justify-self-end flex items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/85 px-4 py-2 shadow-[0_4px_12px_rgba(86,60,36,0.1)]">
           <span aria-hidden="true" className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_0_3px_rgba(245,158,11,0.16)]" />
           <span className="whitespace-nowrap font-monaSans text-[10px] font-extrabold uppercase tracking-[0.18em] text-amber-950 sm:text-xs">
             Arena Quiz
           </span>
           <span aria-hidden="true" className="text-sm leading-none">✦</span>
         </div>
-        <button
-          type="button"
-          onClick={() => sendSpeechToJudge("skip")}
-          disabled={isTransitioningRef.current || !gameStarted || isEvaluating}
-          className="group inline-flex justify-self-end items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/75 px-4 py-2 text-[11px] font-bold text-amber-950/65 shadow-[0_3px_0_rgba(119,77,49,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#fff4c8] hover:text-amber-950 hover:shadow-[0_5px_0_rgba(119,77,49,0.16)] active:translate-y-0.5 active:shadow-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <span className="hidden sm:inline">Lewati soal</span>
-          <span className="sm:hidden">Skip</span>
-          <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">➜</span>
-        </button>
       </header>
 
       {/* 5. ARENA PERTANYAAN (PILIHAN GANDA) */}
       <main className="@container relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center gap-5 py-3 xl:gap-7 xl:py-10 [@media(max-height:650px)]:gap-2 [@media(max-height:650px)]:py-1 lg:min-h-0 lg:justify-start lg:pt-[clamp(0.75rem,4vh,2rem)] lg:pb-3 xl:pt-[clamp(0.75rem,4vh,2rem)] xl:pb-3">
-        <motion.div
-          key={currentQuestion?.id}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="relative flex w-full max-w-[540px] shrink-0 flex-col items-center overflow-hidden rounded-[2rem] border border-amber-950/10 bg-[#fffdf5]/60 px-5 py-6 shadow-[0_14px_36px_rgba(71,55,29,0.12)] backdrop-blur-[1px] sm:px-10 sm:py-8 xl:max-w-[620px] [@media(max-height:650px)]:py-3"
-        >
+        <div className="relative w-full max-w-[540px] shrink-0 xl:max-w-[620px]">
+          <motion.div
+            key={currentQuestion?.id}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative flex w-full flex-col items-center overflow-hidden rounded-[2rem] border border-amber-950/10 bg-[#fffdf5]/60 px-5 py-6 shadow-[0_14px_36px_rgba(71,55,29,0.12)] backdrop-blur-[1px] sm:px-10 sm:py-8 [@media(max-height:650px)]:py-3"
+          >
           {/* Progress Bar Soal */}
           <div className="absolute inset-x-0 top-0 h-2 overflow-hidden bg-amber-950/10">
             <div
@@ -1037,7 +1066,20 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+          </motion.div>
+          <div className="mt-2 flex justify-end">
+            <button
+              type="button"
+              onClick={() => sendSpeechToJudge("skip")}
+              disabled={isTransitioningRef.current || !gameStarted || isEvaluating}
+              className="group inline-flex items-center gap-2 rounded-full border border-amber-900/10 bg-[#fff8df]/85 px-4 py-2 text-[11px] font-bold text-amber-950/75 shadow-[0_3px_0_rgba(119,77,49,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#fff4c8] hover:text-amber-950 hover:shadow-[0_5px_0_rgba(119,77,49,0.16)] active:translate-y-0.5 active:shadow-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <span className="hidden sm:inline">Lewati soal</span>
+              <span className="sm:hidden">Skip</span>
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">➜</span>
+            </button>
+          </div>
+        </div>
         {/* LEFT SIDE ASIDE: Sticky Note Timer */}
         <aside
           aria-label="Timer kuis"
