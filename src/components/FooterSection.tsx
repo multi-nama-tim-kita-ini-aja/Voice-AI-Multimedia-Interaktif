@@ -35,7 +35,12 @@ export default function FooterSection() {
           {/* CTA Button: Selalu di tengah untuk Mobile & Desktop */}
           <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
             <div className="pointer-events-auto">
-              <CustomWaveButton className="h-12 px-8 text-base md:h-14 md:px-10 md:text-xl">
+              <CustomWaveButton
+                className="h-12 px-8 text-base md:h-14 md:px-10 md:text-xl"
+                onClick={() =>
+                  document.getElementById("categories")?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
                 Start Quiz
               </CustomWaveButton>
             </div>

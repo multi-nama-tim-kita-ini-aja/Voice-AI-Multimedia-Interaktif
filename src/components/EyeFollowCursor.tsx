@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function EyeFollowCursor() {
+    const pathname = usePathname();
     const [pos, setPos] = useState({ x: -100, y: -100 });
     const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
     const targetPos = useRef({ x: -100, y: -100 });
@@ -48,6 +50,9 @@ export default function EyeFollowCursor() {
             cancelAnimationFrame(animationFrameId);
         };
     }, [pos.x, pos.y]);
+
+    // Sembunyikan EyeFollowCursor di halaman quiz (setelah semua hooks)
+    if (pathname?.startsWith("/quiz")) return null;
 
     return (
         <div

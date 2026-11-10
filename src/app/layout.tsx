@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import EyeFollowCursor from "@/components/EyeFollowCursor";
 import MenuMacOS from "@/components/MenuMacOS";
 import SmoothScroll from "@/components/SmoothScroll";
+import { Toaster } from "sonner";
 
 const figtree = Figtree({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <EyeFollowCursor />
         <SmoothScroll>
           {children}
+          <Toaster position="top-center" richColors />
         </SmoothScroll>
         <MenuMacOS />
       </body>
