@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { motion } from "motion/react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Book02Icon } from "@hugeicons/core-free-icons";
+import {
+  RedBerrySticker,
+  BlueberrySticker,
+  SparklesSticker,
+  CherrySticker,
+  NazarSticker,
+  EyeSplatSticker,
+} from "stick-it-up";
 
 import BowTieDoodle from "@/components/svg/BowTieDoodle";
 import DoubleCloudDoodle from "@/components/svg/DoubleCloudDoodle";
@@ -78,8 +87,44 @@ const STEPS: StepItem[] = [
   },
 ];
 
+type CardStickerConfig = {
+  Component: React.ElementType;
+  x: number;
+  y: number;
+  rotate: number;
+  delay: number;
+};
+
+// 2-3 stiker per card yang mencuat ke atas & bawah saat hover/active
+const CARD_STICKERS: Record<string, CardStickerConfig[]> = {
+  "step-1": [
+    { Component: RedBerrySticker, x: -75, y: -110, rotate: -16, delay: 0 },
+    { Component: SparklesSticker, x: 70, y: -105, rotate: 14, delay: 0.06 },
+    { Component: BlueberrySticker, x: -20, y: 112, rotate: -8, delay: 0.12 },
+  ],
+  "step-2": [
+    { Component: CherrySticker, x: -65, y: -112, rotate: -12, delay: 0 },
+    { Component: NazarSticker, x: 75, y: 108, rotate: 16, delay: 0.07 },
+  ],
+  "step-3": [
+    { Component: EyeSplatSticker, x: -75, y: -108, rotate: -18, delay: 0 },
+    { Component: RedBerrySticker, x: 75, y: -105, rotate: 12, delay: 0.06 },
+    { Component: SparklesSticker, x: 15, y: 114, rotate: 10, delay: 0.12 },
+  ],
+  "step-4": [
+    { Component: BlueberrySticker, x: -60, y: -112, rotate: -14, delay: 0 },
+    { Component: EyeSplatSticker, x: 68, y: 110, rotate: 15, delay: 0.07 },
+  ],
+  "step-5": [
+    { Component: SparklesSticker, x: -78, y: -108, rotate: -15, delay: 0 },
+    { Component: CherrySticker, x: 72, y: -110, rotate: 18, delay: 0.06 },
+    { Component: NazarSticker, x: -10, y: 112, rotate: -10, delay: 0.12 },
+  ],
+};
+
 export default function HowToPlay() {
   const [activeStep, setActiveStep] = useState<string | null>(null);
+  const [hoveredStep, setHoveredStep] = useState<string | null>(null);
 
   // Derajat kemiringan rotasi kartu (tetap aktif di mobile & desktop)
   const cardRotations = [-5, 3.5, -4, 4.5, -2.5];
@@ -189,25 +234,28 @@ export default function HowToPlay() {
           </div>
         </div>
 
-        {/* Step Cards Container */}
         {/* Step Cards Container: Muat Pas di Layar Desktop Tanpa Kepotong */}
         <div className="w-full flex justify-center pb-16 pt-4 px-4 overflow-visible">
           <div className="flex flex-col md:flex-row items-center md:items-start justify-center gap-9 md:gap-0 w-full max-w-[1180px]">
             {STEPS.map((step, idx) => {
               const rotate = cardRotations[idx % cardRotations.length];
               const isActive = activeStep === step.id;
+              const isBursting = hoveredStep === step.id || isActive;
               const IconComponent = step.icon;
+              const stickers = CARD_STICKERS[step.id] ?? [];
 
               return (
                 <div
                   key={step.id}
+                  onMouseEnter={() => setHoveredStep(step.id)}
+                  onMouseLeave={() => setHoveredStep(null)}
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveStep(step.id);
                   }}
                   style={{
                     transform: `rotate(${rotate}deg)`,
-                    zIndex: isActive ? 50 : idx + 1,
+                    zIndex: isBursting ? 50 : idx + 1,
                   }}
                   className={`group relative cursor-pointer select-none transition-all duration-300 ${step.desktopMt} ${idx > 0 ? "md:-ml-14 lg:-ml-16" : ""
                     } ${isActive
@@ -215,11 +263,35 @@ export default function HowToPlay() {
                       : "hover:!z-50 hover:scale-105 hover:rotate-0 hover:-translate-y-3"
                     }`}
                 >
+                  {/* Stiker yang keluar dari balik card saat hover / active */}
+                  <div className="pointer-events-none absolute inset-0 z-0">
+                    {stickers.map(({ Component, x, y, rotate: sRotate, delay }, sIdx) => (
+                      <motion.div
+                        key={sIdx}
+                        initial={{ x: 0, y: 0, scale: 0, opacity: 0, rotate: 0 }}
+                        animate={
+                          isBursting
+                            ? { x, y, scale: 1, opacity: 1, rotate: sRotate }
+                            : { x: 0, y: 0, scale: 0, opacity: 0, rotate: 0 }
+                        }
+                        transition={{
+                          delay: isBursting ? delay : 0,
+                          type: "spring",
+                          stiffness: 320,
+                          damping: 18,
+                        }}
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                      >
+                        <Component size={64} peel />
+                      </motion.div>
+                    ))}
+                  </div>
+
                   {/* Shadow Layer Tebal di Bawah (Offset Kanan-Bawah Khas Kertas) */}
                   <div className="absolute inset-0 bg-[#000000]/[0.08] rounded-[24px] md:rounded-[28px] translate-x-2.5 translate-y-2.5 pointer-events-none -z-10 transition-transform duration-300 group-hover:translate-x-3.5 group-hover:translate-y-3.5" />
 
                   {/* Card Utama: Proporsi Landscape Pas Layar */}
-                  <div className="relative rounded-[22px] md:rounded-[26px] bg-white p-5 md:p-5 lg:p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-gray-100/90 w-[290px] sm:w-[310px] md:w-[270px] lg:w-[290px] h-[175px] md:h-[180px] lg:h-[190px] flex flex-col justify-between ">
+                  <div className="relative z-10 rounded-[22px] md:rounded-[26px] bg-white p-5 md:p-5 lg:p-6 shadow-[0_4px_16px_rgba(0,0,0,0.04)] border border-gray-100/90 w-[290px] sm:w-[310px] md:w-[270px] lg:w-[290px] h-[175px] md:h-[180px] lg:h-[190px] flex flex-col justify-between">
                     {/* Pin Hiasan Kiri Atas */}
                     <Image
                       src="/pin.png"

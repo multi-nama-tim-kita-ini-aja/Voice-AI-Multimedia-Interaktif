@@ -800,7 +800,7 @@ export default function QuizArenaPage({ params }: QuizPageProps) {
                   autoComplete="off"
                   blobTranslucent={false}
                   isLoading={false}
-                  placeholder="Ketik username kamu..."
+                  placeholder="Type ur username or whatever..."
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);

@@ -1,3 +1,4 @@
+import SplashScreen from "@/components/SplashScreen";
 import HeroSection from "@/components/HeroSection";
 import CategoriesSection from "@/components/CategoriesSection";
 import HowToPlay from "@/components/HowToPlay";
@@ -8,14 +9,17 @@ import FooterSection from "@/components/FooterSection";
 
 export default function Home() {
   return (
-    <main className="relative w-full min-h-screen overflow-x-hidden">
-      <HeroSection />
-      <HowToPlay />
-      <CategoriesSection />
-      <Leaderboard />
-      <Cloud />
-      <FaqSection />
-      <FooterSection />
-    </main>
+    <>
+      <SplashScreen />
+      <main className="relative w-full min-h-screen overflow-x-hidden">
+        <HeroSection />
+        <HowToPlay />
+        <CategoriesSection />
+        <Leaderboard />
+        <Cloud />
+        <FaqSection />
+        <FooterSection />
+      </main>
+    </>
   );
 }

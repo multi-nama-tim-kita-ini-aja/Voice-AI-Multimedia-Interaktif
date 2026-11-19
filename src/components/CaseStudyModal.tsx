@@ -45,7 +45,7 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 
   const [selectedLevel, setSelectedLevel] = useState<LevelType>("1");
@@ -69,8 +69,8 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
             permissionStatus.state === "granted"
               ? "allowed"
               : permissionStatus.state === "denied"
-              ? "denied"
-              : "idle";
+                ? "denied"
+                : "idle";
           setMicState(status);
 
           permissionStatus.onchange = () => {
@@ -78,8 +78,8 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
               permissionStatus.state === "granted"
                 ? "allowed"
                 : permissionStatus.state === "denied"
-                ? "denied"
-                : "idle";
+                  ? "denied"
+                  : "idle";
             setMicState(nextStatus);
           };
         })
@@ -111,7 +111,7 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
     if (micState !== "allowed") {
       showWarningToast(
         "Microphone Required",
-        "Please enable your microphone first"
+        "Please enable your microphone first",
       );
       return;
     }
@@ -183,7 +183,13 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
 
               <div className="flex items-center justify-between px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-white border border-black/10 rounded-md flex-1 max-w-[280px] sm:max-w-[420px] mx-2 sm:mx-4 shadow-sm">
                 <div className="flex items-center gap-1.5 sm:gap-2 text-[#999] truncate">
-                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" className="shrink-0">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 14 14"
+                    fill="none"
+                    className="shrink-0"
+                  >
                     <path
                       d="M11.23 11.23L9.04 9.04M2.77 6.42C2.77 4.4 4.4 2.77 6.42 2.77C8.43 2.77 10.06 4.4 10.06 6.42C10.06 8.43 8.43 10.06 6.42 10.06C4.4 10.06 2.77 8.43 2.77 6.42Z"
                       stroke="currentColor"
@@ -226,9 +232,7 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
                   {card.title}
                 </h3>
                 <div onClick={handleStartQuiz}>
-                  <CustomWaveButton>
-                    Let&apos;s Go
-                  </CustomWaveButton>
+                  <CustomWaveButton>Let&apos;s Go</CustomWaveButton>
                 </div>
               </div>
 
@@ -257,7 +261,11 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
                       >
                         <span>Level {lvl}</span>
                         <span className="text-[10px] font-normal opacity-80">
-                          {lvl === "1" ? "Easy" : lvl === "2" ? "Medium" : "Hard"}
+                          {lvl === "1"
+                            ? "Easy"
+                            : lvl === "2"
+                              ? "Medium"
+                              : "Hard"}
                         </span>
                       </button>
                     );
@@ -330,7 +338,9 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
                       disabled={micState === "requesting"}
                       className="cursor-pointer text-xs"
                     >
-                      {micState === "requesting" ? "Connecting..." : "Enable Voice Mic"}
+                      {micState === "requesting"
+                        ? "Connecting..."
+                        : "Enable Voice Mic"}
                     </CosmicButton>
                   )}
                 </div>
@@ -340,6 +350,6 @@ export default function CaseStudyModal({ card, onClose }: CaseStudyModalProps) {
         </motion.div>
       </AnimatePresence>
     </>,
-    document.body
+    document.body,
   );
 }
